@@ -14,3 +14,4 @@ miette = { version = "4.3", features = ["fancy"] }
 tree-sitter = "0.20.6"
 tree-sitter-c = "0.20.1"
 colored = "2"
+itertools = "*"
