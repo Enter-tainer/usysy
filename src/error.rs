@@ -11,5 +11,8 @@ pub enum Error {
   #[error("io error")]
   #[diagnostic()]
   IO(#[from] std::io::Error),
+  #[error("unknown type")]
+  #[diagnostic()]
+  UnknownType()
 }
 pub type Result<T> = std::result::Result<T, Error>;
