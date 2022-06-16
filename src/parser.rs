@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::error::{Error, Result};
 use colored::*;
 use itertools::Itertools;
-use tree_sitter::{Node, Parser, Tree};
+use tree_sitter::{Node, Parser, Tree, TreeCursor};
 pub fn parse(input: &str) -> Result<Tree> {
   let mut parser = Parser::new();
   let language = tree_sitter_c::language();
@@ -13,6 +13,20 @@ pub fn parse(input: &str) -> Result<Tree> {
     .ok_or(Error::TreesitterParseFailed)?;
   Ok(tree)
 }
+
+pub fn useful_children<'a, 'tree>(
+  node: &'a Node<'tree>,
+  cursor: &'a mut TreeCursor<'tree>,
+) -> impl Iterator<Item = Node<'tree>> + 'a {
+  node.children(cursor).enumerate().filter_map(|(i, n)| {
+    if n.is_named() || node.field_name_for_child(i as u32).is_some() {
+      Some(n)
+    } else {
+      None
+    }
+  })
+}
+
 #[allow(dead_code)]
 fn dump_node_internal(
   node: &Node,
@@ -59,17 +73,7 @@ fn dump_node_internal(
   };
   let nodes: Vec<_> = {
     let mut cursor = node.walk();
-    node
-      .children(&mut cursor)
-      .enumerate()
-      .filter_map(|(i, n)| {
-        if n.is_named() || node.field_name_for_child(i as u32).is_some() {
-          Some(n)
-        } else {
-          None
-        }
-      })
-      .collect_vec()
+    useful_children(node, &mut cursor).collect_vec()
   };
   let prefix = format!("{}{}   ", prefix, if is_last { " " } else { "│" });
   for i in nodes.into_iter().with_position() {
