@@ -3,7 +3,8 @@ use std::collections::HashMap;
 use crate::error::{Error, Result};
 use colored::*;
 use itertools::Itertools;
-use tree_sitter::{Node, Parser, Tree, TreeCursor};
+use miette::{ByteOffset, SourceCode, SourceSpan};
+use tree_sitter::{Node, Parser, Range, Tree, TreeCursor};
 pub fn parse(input: &str) -> Result<Tree> {
   let mut parser = Parser::new();
   let language = tree_sitter_c::language();
@@ -25,6 +26,14 @@ pub fn useful_children<'a, 'tree>(
       None
     }
   })
+}
+
+pub fn get_text<'tree, 'content>(node: Node<'tree>, content: &'content str) -> &'content str {
+  node.utf8_text(content.as_bytes()).unwrap()
+}
+
+pub fn to_source_span(range: Range) -> SourceSpan {
+  SourceSpan::from((range.start_byte, range.end_byte - range.start_byte))
 }
 
 #[allow(dead_code)]

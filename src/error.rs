@@ -1,4 +1,4 @@
-use miette::Diagnostic;
+use miette::{Diagnostic, NamedSource, SourceSpan};
 use thiserror::Error;
 #[derive(Debug, Error, Diagnostic)]
 pub enum Error {
@@ -13,6 +13,14 @@ pub enum Error {
   IO(#[from] std::io::Error),
   #[error("unknown type")]
   #[diagnostic()]
-  UnknownType()
+  UnknownType(),
+  #[error("duplicate global symbol")]
+  #[diagnostic()]
+  DuplicateGlobalSymbol {
+    #[source_code]
+    src: NamedSource,
+    #[label("duplicate symbol here")]
+    range: SourceSpan,
+  },
 }
 pub type Result<T> = std::result::Result<T, Error>;

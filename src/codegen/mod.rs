@@ -1,5 +1,6 @@
-mod global;
 mod function;
+mod global;
+mod var;
 use std::{
   collections::{HashMap, VecDeque},
   path::Path,
@@ -11,13 +12,14 @@ use inkwell::{
   builder::Builder,
   context::Context,
   module::Module,
+  types::{BasicType, BasicTypeEnum},
   values::{FunctionValue, PointerValue},
 };
-use tree_sitter::Tree;
+use tree_sitter::{Node, Tree};
 
-use crate::error::{Result, Error};
+use crate::error::{Error, Result};
 
-pub struct Generator<'ctx> {
+pub struct Generator<'ctx, 'node> {
   file: File<'ctx>,
   context: &'ctx Context,
   module: Module<'ctx>,
@@ -28,22 +30,36 @@ pub struct Generator<'ctx> {
   //<<<<<<<<<<<<<<<<<<<<<<<<
 
   // value -> (type, pointer) map in a LLVM basic block
-  val_map_block_stack: ChainMap<String, (BasicType, PointerValue<'ctx>)>,
+  val_map_block_stack: ChainMap<String, (MBasicType<'node>, PointerValue<'ctx>)>,
   // current function block
-  current_function: Option<(FunctionValue<'ctx>, BasicType)>,
+  current_function: Option<(FunctionValue<'ctx>, MBasicType<'node>)>,
   // break labels (in loop statements)
   break_labels: VecDeque<BasicBlock<'ctx>>,
   // continue labels (in loop statements)
   continue_labels: VecDeque<BasicBlock<'ctx>>,
   // hashset for functions
-  function_map: HashMap<String, (BasicType, Vec<BasicType>, bool)>,
+  function_map: HashMap<String, (MBasicType<'node>, Vec<MBasicType<'node>>, bool)>,
   // hashset for global variable
-  global_variable_map: HashMap<String, (BasicType, PointerValue<'ctx>)>,
 }
 #[derive(Debug)]
-pub struct BasicType {
+pub struct MBasicType<'node> {
   pub is_const: bool,
-  pub base_type: BaseType,
+  pub base_type: BaseType<'node>,
+}
+
+impl<'node> MBasicType<'node> {
+  pub fn new_with_base(base_type: BaseType<'node>, is_const: bool) -> Self {
+    Self {
+      is_const,
+      base_type,
+    }
+  }
+  pub fn new_with_base_mut(base_type: BaseType<'node>) -> Self {
+    Self {
+      is_const: false,
+      base_type,
+    }
+  }
 }
 
 #[derive(Debug)]
@@ -53,27 +69,48 @@ pub struct File<'ctx> {
 }
 
 #[derive(Debug)]
-pub enum BaseType {
+pub enum BaseType<'node> {
   Int,
   Float,
   Void,
+  Array(
+    /// element type
+    Box<MBasicType<'node>>,
+    /// array length, from high-dimension to low-dimension
+    Vec<Node<'node>>,
+  ),
 }
 
-impl TryFrom<&str> for BaseType {
-    type Error = Error;
-
-    fn try_from(value: &str) -> Result<Self> {
-        match value {
-          "int" => Ok(BaseType::Int),
-          "float" => Ok(BaseType::Float),
-          "void" => Ok(BaseType::Void),
-          _ => Err(Error::UnknownType()),
-        }
+impl<'node, 'ctx> BaseType<'node> {
+  pub fn to_llvm_type(&self, ctx: &'ctx Context) -> BasicTypeEnum<'ctx> {
+    match self {
+      BaseType::Int => ctx.i32_type().as_basic_type_enum(),
+      BaseType::Float => ctx.f32_type().as_basic_type_enum(),
+      BaseType::Void => ctx.i8_type().as_basic_type_enum(),
+      BaseType::Array(_, _) => todo!(),
     }
+  }
 }
 
-impl<'ctx> Generator<'ctx> {
-  pub fn new(context: &'ctx Context, path: &'ctx str, content: &'ctx str) -> Generator<'ctx> {
+impl<'node> TryFrom<&str> for BaseType<'node> {
+  type Error = Error;
+
+  fn try_from(value: &str) -> Result<Self> {
+    match value {
+      "int" => Ok(BaseType::Int),
+      "float" => Ok(BaseType::Float),
+      "void" => Ok(BaseType::Void),
+      _ => Err(Error::UnknownType()),
+    }
+  }
+}
+
+impl<'ctx, 'node> Generator<'ctx, 'node> {
+  pub fn new(
+    context: &'ctx Context,
+    path: &'ctx str,
+    content: &'ctx str,
+  ) -> Generator<'ctx, 'node> {
     let module_name = Path::new(path).file_stem().unwrap().to_str().unwrap();
     let file = File {
       content,
@@ -93,7 +130,6 @@ impl<'ctx> Generator<'ctx> {
       break_labels: VecDeque::new(),
       continue_labels: VecDeque::new(),
       function_map: HashMap::new(),
-      global_variable_map: HashMap::new(),
     }
   }
   pub fn gen(&mut self, ast: &Tree) -> Result<()> {

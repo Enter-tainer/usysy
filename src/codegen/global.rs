@@ -1,17 +1,16 @@
-use crate::{
-  error::{Error, Result},
-  parser::useful_children,
-};
+use crate::{error::Result, parser::useful_children};
 use tree_sitter::Node;
 
 use super::Generator;
 
-impl<'ctx> Generator<'ctx> {
+impl<'ctx, 'node> Generator<'ctx, 'node> {
   pub(super) fn generate_global_proto(&mut self, root: Node) -> Result<()> {
     let mut cursor = root.walk();
     for node in useful_children(&root, &mut cursor) {
-      if node.kind() == "function_definition" {
-        self.generate_function_proto(node)?;
+      match node.kind() {
+        "function_definition" =>  self.generate_function_proto(node)?,
+        "declaration" => self.generate_global_var(node)?,
+        _ => {}
       }
     }
     Ok(())
