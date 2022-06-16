@@ -88,23 +88,27 @@ module.exports = grammar({
       $.braced_init_val,
     ),
 
-    parameter_list: $ => seq(
+    parameter_list: $ => choice(
+      seq('(', ')'),
+      seq(
       '(',
-      commaSep(
-        seq(
-          field('type', $.primitive_type),
-          field('name', $.identifier),
-          optional(
-            seq(
-              $.parameter_empty_array,
-              repeat($.parameter_array_dimension)
-            )
-          )
-        )
-      ),
+        $._parameter_list,
       ')'
+    )),
+    _parameter_list: $ => commaSep1(
+      $.parameter,
     ),
-
+    parameter_array: $ => seq(
+      $.parameter_empty_array,
+      repeat($.parameter_array_dimension)
+    ),
+    parameter: $ => seq(
+      field('type', $.primitive_type),
+      field('name', $.identifier),
+      field('array', optional(
+        $.parameter_array
+      ))
+    ),
     parameter_empty_array: $ => token(seq('[', ']')),
     parameter_array_dimension: $ => seq(
       '[',
@@ -128,7 +132,7 @@ module.exports = grammar({
       repeat($._statement),
       '}'
     ),
-
+    
     _statement: $ => choice(
       seq($.assignment, ';'),
       $.expression_statement,
