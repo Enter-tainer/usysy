@@ -7,7 +7,7 @@ use miette::{ByteOffset, SourceCode, SourceSpan};
 use tree_sitter::{Node, Parser, Range, Tree, TreeCursor};
 pub fn parse(input: &str) -> Result<Tree> {
   let mut parser = Parser::new();
-  let language = tree_sitter_c::language();
+  let language = tree_sitter_sysy::language();
   parser.set_language(language)?;
   let tree = parser
     .parse(input.as_bytes(), None)
