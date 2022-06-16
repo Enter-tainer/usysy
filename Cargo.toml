@@ -12,6 +12,6 @@ thiserror = "1.0"
 typed-arena = "2.0.1"
 miette = { version = "4.3", features = ["fancy"] }
 tree-sitter = "0.20.6"
-tree-sitter-c = "0.20.1"
+tree-sitter-c = {path = "./tree-sitter-c"}
 colored = "2"
 itertools = "*"
