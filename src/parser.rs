@@ -12,13 +12,20 @@ pub fn parse(input: &str) -> Result<Tree> {
   Ok(tree)
 }
 #[allow(dead_code)]
-fn dump_node_internal(node: &Node, prefix: &str, content: &str, is_last: bool, is_init: bool) {
+fn dump_node_internal(
+  node: &Node,
+  prefix: &str,
+  content: &str,
+  field_name: Option<&str>,
+  is_last: bool,
+  is_init: bool,
+) {
   let node_text = node.utf8_text(content.as_bytes()).unwrap();
   let start = node.start_position();
   let end = node.end_position();
   let kind = node.kind();
   println!(
-    "{}{}`{}` {} - {}{}",
+    "{}{}{}: `{}` {} - {}{}",
     prefix,
     if is_init {
       ""
@@ -26,6 +33,10 @@ fn dump_node_internal(node: &Node, prefix: &str, content: &str, is_last: bool, i
       "└──"
     } else {
       "├──"
+    },
+    match field_name {
+      Some(name) => name.bold().yellow(),
+      None => "[ANON]".normal(),
     },
     kind.bold(),
     start,
@@ -46,13 +57,27 @@ fn dump_node_internal(node: &Node, prefix: &str, content: &str, is_last: bool, i
         break;
       }
     }
-    for i in nodes.into_iter().with_position() {
+    for i in nodes.into_iter().enumerate().with_position() {
       match i {
-        itertools::Position::First(i) | itertools::Position::Middle(i) => {
-          dump_node_internal(&i, &prefix, content, false, false);
+        itertools::Position::First((idx, n)) | itertools::Position::Middle((idx, n)) => {
+          dump_node_internal(
+            &n,
+            &prefix,
+            content,
+            node.field_name_for_child(idx as u32),
+            false,
+            false,
+          );
         }
-        itertools::Position::Last(i) | itertools::Position::Only(i) => {
-          dump_node_internal(&i, &prefix, content, true, false);
+        itertools::Position::Last((idx, n)) | itertools::Position::Only((idx, n)) => {
+          dump_node_internal(
+            &n,
+            &prefix,
+            content,
+            node.field_name_for_child(idx as u32),
+            true,
+            false,
+          );
         }
       }
     }
@@ -61,5 +86,5 @@ fn dump_node_internal(node: &Node, prefix: &str, content: &str, is_last: bool, i
 
 #[allow(dead_code)]
 pub fn dump_node(node: &Node, content: &str) {
-  dump_node_internal(node, "", content, true, true);
+  dump_node_internal(node, "", content, None, true, true);
 }
