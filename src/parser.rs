@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::error::{Error, Result};
 use colored::*;
 use itertools::Itertools;
@@ -47,38 +49,40 @@ fn dump_node_internal(
       "".to_owned().normal()
     }
   );
-  let mut cursor = node.walk();
-  if cursor.goto_first_child() {
-    let prefix = format!("{}{}   ", prefix, if is_last { " " } else { "│" });
-    let mut nodes = Vec::new();
-    loop {
-      nodes.push(cursor.node());
-      if !cursor.goto_next_sibling() {
-        break;
+  let node_to_idx: HashMap<_, _> = {
+    let mut cursor = node.walk();
+    node
+      .children(&mut cursor)
+      .enumerate()
+      .map(|(x, y)| (y, x))
+      .collect()
+  };
+  let nodes: Vec<_> = {
+    let mut cursor = node.walk();
+    node.named_children(&mut cursor).collect_vec()
+  };
+  let prefix = format!("{}{}   ", prefix, if is_last { " " } else { "│" });
+  for i in nodes.into_iter().with_position() {
+    match i {
+      itertools::Position::First(n) | itertools::Position::Middle(n) => {
+        dump_node_internal(
+          &n,
+          &prefix,
+          content,
+          node.field_name_for_child(node_to_idx[&n] as u32),
+          false,
+          false,
+        );
       }
-    }
-    for i in nodes.into_iter().enumerate().with_position() {
-      match i {
-        itertools::Position::First((idx, n)) | itertools::Position::Middle((idx, n)) => {
-          dump_node_internal(
-            &n,
-            &prefix,
-            content,
-            node.field_name_for_child(idx as u32),
-            false,
-            false,
-          );
-        }
-        itertools::Position::Last((idx, n)) | itertools::Position::Only((idx, n)) => {
-          dump_node_internal(
-            &n,
-            &prefix,
-            content,
-            node.field_name_for_child(idx as u32),
-            true,
-            false,
-          );
-        }
+      itertools::Position::Last(n) | itertools::Position::Only(n) => {
+        dump_node_internal(
+          &n,
+          &prefix,
+          content,
+          node.field_name_for_child(node_to_idx[&n] as u32),
+          true,
+          false,
+        );
       }
     }
   }
