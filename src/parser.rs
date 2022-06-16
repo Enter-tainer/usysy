@@ -59,7 +59,17 @@ fn dump_node_internal(
   };
   let nodes: Vec<_> = {
     let mut cursor = node.walk();
-    node.named_children(&mut cursor).collect_vec()
+    node
+      .children(&mut cursor)
+      .enumerate()
+      .filter_map(|(i, n)| {
+        if n.is_named() || node.field_name_for_child(i as u32).is_some() {
+          Some(n)
+        } else {
+          None
+        }
+      })
+      .collect_vec()
   };
   let prefix = format!("{}{}   ", prefix, if is_last { " " } else { "│" });
   for i in nodes.into_iter().with_position() {
