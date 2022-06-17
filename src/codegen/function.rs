@@ -20,7 +20,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     
     let params = function.child_by_field_name("param").unwrap();
     if self.function_map.contains_key(func_name_str)
-      || self.val_map_block_stack.has_at(0, func_name_str)
+      || self.val_map_block_stack[0].contains_key(func_name_str)
     {
       return Err(Error::DuplicateGlobalSymbol {
         src: NamedSource::new(self.file.name, self.file.content.to_string()),

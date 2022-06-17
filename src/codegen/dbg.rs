@@ -14,4 +14,9 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
       println!("{name} {param_str} -> {return_type}",);
     }
   }
+  pub fn print_global_var(&self) {
+    for (name, (ty, _)) in &self.val_map_block_stack[0] {
+      println!("{name}: {ty}");
+    }
+  }
 }

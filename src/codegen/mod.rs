@@ -2,6 +2,7 @@ mod dbg;
 mod function;
 mod global;
 mod var;
+mod expr;
 use std::{
   collections::{HashMap, VecDeque},
   fmt::Display,
@@ -32,7 +33,7 @@ pub struct Generator<'ctx, 'node> {
   //<<<<<<<<<<<<<<<<<<<<<<<<
 
   // value -> (type, pointer) map in a LLVM basic block
-  val_map_block_stack: ChainMap<String, (MBasicType<'node>, PointerValue<'ctx>)>,
+  val_map_block_stack: Vec<HashMap<String, (MBasicType<'node>, PointerValue<'ctx>)>>,
   // current function block
   current_function: Option<(FunctionValue<'ctx>, MBasicType<'node>)>,
   // break labels (in loop statements)
@@ -43,7 +44,7 @@ pub struct Generator<'ctx, 'node> {
   function_map: HashMap<String, (MBasicType<'node>, Vec<MBasicType<'node>>, bool)>,
   // hashset for global variable
 }
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MBasicType<'node> {
   pub is_const: bool,
   pub base_type: BaseType<'node>,
@@ -80,7 +81,7 @@ pub struct File<'ctx> {
   name: &'ctx str,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum BaseType<'node> {
   Int,
   Float,
@@ -142,7 +143,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     let module = context.create_module(module_name);
     let builder = context.create_builder();
     let global_variable_map = HashMap::new();
-    let val_map_block_stack = ChainMap::new(global_variable_map);
+    let val_map_block_stack = vec![global_variable_map];
     Generator {
       file,
       context,
