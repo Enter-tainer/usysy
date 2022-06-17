@@ -13,6 +13,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
         _ => {}
       }
     }
+    self.print_function_proto();
     Ok(())
   }
 

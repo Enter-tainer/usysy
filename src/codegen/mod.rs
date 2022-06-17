@@ -1,8 +1,10 @@
+mod dbg;
 mod function;
 mod global;
 mod var;
 use std::{
   collections::{HashMap, VecDeque},
+  fmt::Display,
   path::Path,
 };
 
@@ -62,6 +64,16 @@ impl<'node> MBasicType<'node> {
   }
 }
 
+impl<'node> Display for MBasicType<'node> {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.write_fmt(format_args!(
+      "{} {}",
+      if self.is_const { "const" } else { "" },
+      self.base_type
+    ))
+  }
+}
+
 #[derive(Debug)]
 pub struct File<'ctx> {
   content: &'ctx str,
@@ -75,10 +87,21 @@ pub enum BaseType<'node> {
   Void,
   Array(
     /// element type
-    Box<MBasicType<'node>>,
+    Box<BaseType<'node>>,
     /// array length, from high-dimension to low-dimension
     Vec<Node<'node>>,
   ),
+}
+
+impl<'node> Display for BaseType<'node> {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    match self {
+      BaseType::Int => f.write_str("i32"),
+      BaseType::Float => f.write_str("f32"),
+      BaseType::Void => f.write_str("void"),
+      BaseType::Array(b, _) => f.write_fmt(format_args!("{} array", b)),
+    }
+  }
 }
 
 impl<'node, 'ctx> BaseType<'node> {
