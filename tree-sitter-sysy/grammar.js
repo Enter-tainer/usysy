@@ -46,7 +46,7 @@ module.exports = grammar({
     // Main Grammar
 
     function_definition: $ => seq(
-      $.primitive_type,
+      field('return_type', $.primitive_type),
       field('name', $.identifier),
       field('param', $.parameter_list),
       field('body', $.compound_statement)
@@ -60,32 +60,32 @@ module.exports = grammar({
       ),
       ';'
     ),
-    array_dimension: $ => repeat1(seq(
+    declarator_array_dimension: $ => repeat1(seq(
       '[',
       $._expression,
       ']',
     )),
     declarator: $ => seq(
       field('name', $.identifier),
-      field('dimension', optional($.array_dimension)),
+      field('dimension', optional($.declarator_array_dimension)),
       optional(
         seq(
           '=',
-          field('init', $.init_val)
+          field('init', $.init_value)
         )
       )
     ),
-    init_val: $ => $._init_val,
-    empty_brace: $ => seq('{', '}'),
-    braced_init_val: $ => seq(
+    init_value: $ => $._init_value,
+    empty_init_list: $ => seq('{', '}'),
+    init_list: $ => seq(
       '{',
-      commaSep1($._init_val),
+      commaSep1($._init_value),
       '}'
     ),
-    _init_val: $ => choice(
+    _init_value: $ => choice(
       $._expression,
-      $.empty_brace,
-      $.braced_init_val,
+      $.empty_init_list,
+      $.init_list,
     ),
 
     parameter_list: $ => choice(
@@ -99,7 +99,7 @@ module.exports = grammar({
       $.parameter,
     ),
     parameter_array: $ => seq(
-      $.parameter_empty_array,
+      $.empty_array,
       repeat($.parameter_array_dimension)
     ),
     parameter: $ => seq(
@@ -109,7 +109,7 @@ module.exports = grammar({
         $.parameter_array
       ))
     ),
-    parameter_empty_array: $ => token(seq('[', ']')),
+    empty_array: $ => token(seq('[', ']')),
     parameter_array_dimension: $ => seq(
       '[',
       $._expression,
@@ -201,7 +201,7 @@ module.exports = grammar({
 
     assignment: $ => prec.right(PREC.ASSIGNMENT, seq(
       field('left', $._assignment_left_expression),
-      field('operator', '='),
+      '=',
       field('right', $._expression)
     )),
 

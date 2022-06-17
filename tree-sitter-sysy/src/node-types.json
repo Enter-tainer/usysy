@@ -43,49 +43,6 @@
     }
   },
   {
-    "type": "array_dimension",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "binary_expression",
-          "named": true
-        },
-        {
-          "type": "call_expression",
-          "named": true
-        },
-        {
-          "type": "float_literal",
-          "named": true
-        },
-        {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "int_literal",
-          "named": true
-        },
-        {
-          "type": "parenthesized_expression",
-          "named": true
-        },
-        {
-          "type": "subscript_expression",
-          "named": true
-        },
-        {
-          "type": "unary_expression",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "assignment",
     "named": true,
     "fields": {
@@ -100,16 +57,6 @@
           {
             "type": "subscript_expression",
             "named": true
-          }
-        ]
-      },
-      "operator": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "=",
-            "named": false
           }
         ]
       },
@@ -294,57 +241,6 @@
     }
   },
   {
-    "type": "braced_init_val",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "binary_expression",
-          "named": true
-        },
-        {
-          "type": "braced_init_val",
-          "named": true
-        },
-        {
-          "type": "call_expression",
-          "named": true
-        },
-        {
-          "type": "empty_brace",
-          "named": true
-        },
-        {
-          "type": "float_literal",
-          "named": true
-        },
-        {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "int_literal",
-          "named": true
-        },
-        {
-          "type": "parenthesized_expression",
-          "named": true
-        },
-        {
-          "type": "subscript_expression",
-          "named": true
-        },
-        {
-          "type": "unary_expression",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "break_statement",
     "named": true,
     "fields": {}
@@ -500,7 +396,7 @@
         "required": false,
         "types": [
           {
-            "type": "array_dimension",
+            "type": "declarator_array_dimension",
             "named": true
           }
         ]
@@ -510,7 +406,7 @@
         "required": false,
         "types": [
           {
-            "type": "init_val",
+            "type": "init_value",
             "named": true
           }
         ]
@@ -528,7 +424,50 @@
     }
   },
   {
-    "type": "empty_brace",
+    "type": "declarator_array_dimension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
+          "type": "call_expression",
+          "named": true
+        },
+        {
+          "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "int_literal",
+          "named": true
+        },
+        {
+          "type": "parenthesized_expression",
+          "named": true
+        },
+        {
+          "type": "subscript_expression",
+          "named": true
+        },
+        {
+          "type": "unary_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "empty_init_list",
     "named": true,
     "fields": {}
   },
@@ -608,17 +547,17 @@
             "named": true
           }
         ]
+      },
+      "return_type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "primitive_type",
+            "named": true
+          }
+        ]
       }
-    },
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "primitive_type",
-          "named": true
-        }
-      ]
     }
   },
   {
@@ -730,7 +669,58 @@
     }
   },
   {
-    "type": "init_val",
+    "type": "init_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
+          "type": "call_expression",
+          "named": true
+        },
+        {
+          "type": "empty_init_list",
+          "named": true
+        },
+        {
+          "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "init_list",
+          "named": true
+        },
+        {
+          "type": "int_literal",
+          "named": true
+        },
+        {
+          "type": "parenthesized_expression",
+          "named": true
+        },
+        {
+          "type": "subscript_expression",
+          "named": true
+        },
+        {
+          "type": "unary_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "init_value",
     "named": true,
     "fields": {},
     "children": {
@@ -742,15 +732,11 @@
           "named": true
         },
         {
-          "type": "braced_init_val",
-          "named": true
-        },
-        {
           "type": "call_expression",
           "named": true
         },
         {
-          "type": "empty_brace",
+          "type": "empty_init_list",
           "named": true
         },
         {
@@ -759,6 +745,10 @@
         },
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "init_list",
           "named": true
         },
         {
@@ -825,11 +815,11 @@
       "required": true,
       "types": [
         {
-          "type": "parameter_array_dimension",
+          "type": "empty_array",
           "named": true
         },
         {
-          "type": "parameter_empty_array",
+          "type": "parameter_array_dimension",
           "named": true
         }
       ]
@@ -1311,6 +1301,10 @@
     "named": false
   },
   {
+    "type": "empty_array",
+    "named": true
+  },
+  {
     "type": "float_literal",
     "named": true
   },
@@ -1324,10 +1318,6 @@
   },
   {
     "type": "int_literal",
-    "named": true
-  },
-  {
-    "type": "parameter_empty_array",
     "named": true
   },
   {
