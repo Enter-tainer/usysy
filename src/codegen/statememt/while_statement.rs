@@ -4,10 +4,7 @@ use tree_sitter::Node;
 
 use super::{BaseType, Generator};
 impl<'ctx, 'node> Generator<'ctx, 'node> {
-  pub fn generate_expression(&mut self, root: Node) -> Result<(BaseType, BasicValueEnum<'ctx>)> {
-    Ok((
-      BaseType::Int,
-      BaseType::Int.to_llvm_type(self.context).const_zero(),
-    ))
+  pub(self) fn generate_while_statement(&mut self, root: Node) -> Result<()> {
+    Ok(())
   }
 }
