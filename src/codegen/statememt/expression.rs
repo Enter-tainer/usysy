@@ -1,10 +1,10 @@
-use crate::{error::Result, parser::useful_children};
-use inkwell::values::BasicValueEnum;
+use crate::error::Result;
 use tree_sitter::Node;
 
-use super::{BaseType, Generator};
+use super::Generator;
 impl<'ctx, 'node> Generator<'ctx, 'node> {
-  pub(super) fn generate_expression_statement(&mut self, root: Node) -> Result<()> {
+  pub(super) fn generate_expression_statement(&mut self, _root: Node) -> Result<()> {
+    // do nothing, because single expr has no effect.
     Ok(())
   }
 }

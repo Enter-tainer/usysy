@@ -5,7 +5,7 @@ use crate::{
 use inkwell::{module::Linkage, values::PointerValue};
 use itertools::Itertools;
 use miette::NamedSource;
-use tree_sitter::Node;
+use tree_sitter::{Node, Range};
 
 use super::{BaseType, Generator, MBasicType};
 
@@ -15,13 +15,14 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     var_type: &MBasicType<'node>,
     identifier: &str,
     ptr: PointerValue<'ctx>,
+    range: Range
   ) -> Result<()> {
     let local_map = self.val_map_block_stack.last_mut().unwrap();
 
     if local_map.contains_key(identifier) {
-      return Err(Error::DuplicateGlobalSymbol {
+      return Err(Error::DuplicateSymbol {
         src: NamedSource::new(self.file.name, self.file.content.to_string()),
-        range: (0..15).into(),
+        range: to_source_span(range),
       });
     }
 

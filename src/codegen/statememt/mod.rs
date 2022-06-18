@@ -4,8 +4,7 @@ mod expression;
 mod if_statement;
 mod while_statement;
 
-use crate::{error::Result, parser::useful_children};
-use inkwell::values::BasicValueEnum;
+use crate::error::Result;
 use tree_sitter::Node;
 
 use super::{BaseType, Generator};
@@ -22,7 +21,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
       "return_statement" => {}
       "assignment" => self.generate_assignment_statement(root)?,
       "declaration" => self.generate_local_var(root)?,
-      _ => {}
+      _ => unreachable!("unknown statement type {stat_type}"),
     }
     Ok(())
   }

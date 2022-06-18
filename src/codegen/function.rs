@@ -27,7 +27,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     if self.function_map.contains_key(func_name_str)
       || self.val_map_block_stack[0].contains_key(func_name_str)
     {
-      return Err(Error::DuplicateGlobalSymbol {
+      return Err(Error::DuplicateSymbol {
         src: NamedSource::new(self.file.name, self.file.content.to_string()),
         range: to_source_span(func_name.range()),
       });
@@ -83,6 +83,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     let func_name = function.child_by_field_name("name").unwrap();
     let func_name_str = get_text(func_name, self.file.content);
     let func = self.module.get_function(func_name_str).unwrap();
+    let param_list = function.child_by_field_name("param").unwrap();
     self.val_map_block_stack.push(HashMap::new());
 
     let (func_ty, func_params, _) = self.function_map.get(func_name_str).unwrap().to_owned();
@@ -104,7 +105,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
       let llvm_type = ty.base_type.to_llvm_type(self.context);
       let alloca = builder.build_alloca(llvm_type, name);
       func_param_alloca.push(alloca);
-      self.insert_to_val_map(&ty, name, alloca)?;
+      self.insert_to_val_map(&ty, name, alloca, param_list.range())?;
     }
     for (value, &param_ptr) in func.get_param_iter().zip_eq(func_param_alloca.iter()) {
       self.builder.build_store(param_ptr, value);

@@ -16,7 +16,7 @@ pub enum Error {
   UnknownType(),
   #[error("duplicate global symbol")]
   #[diagnostic()]
-  DuplicateGlobalSymbol {
+  DuplicateSymbol {
     #[source_code]
     src: NamedSource,
     #[label("duplicate symbol here")]
