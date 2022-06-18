@@ -4,6 +4,7 @@ mod global;
 mod var;
 mod statememt;
 mod expression;
+mod utils;
 use std::{
   collections::{HashMap, VecDeque},
   fmt::Display,
@@ -41,7 +42,7 @@ pub struct Generator<'ctx, 'node> {
   // continue labels (in loop statements)
   continue_labels: VecDeque<BasicBlock<'ctx>>,
   // hashset for functions
-  function_map: HashMap<String, (MBasicType<'node>, Vec<MBasicType<'node>>, bool)>,
+  function_map: HashMap<String, (MBasicType<'node>, Vec<(&'ctx str, MBasicType<'node>)>, bool)>,
   // hashset for global variable
 }
 #[derive(Debug, Clone, PartialEq)]
