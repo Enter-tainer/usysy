@@ -10,7 +10,6 @@ use std::{
   path::Path,
 };
 
-use hash_chain::ChainMap;
 use inkwell::{
   basic_block::BasicBlock,
   builder::Builder,

@@ -9,10 +9,8 @@ edition = "2021"
 clap = { version = "3.2", features = ["derive"] }
 inkwell = { git = "https://github.com/TheDan64/inkwell", branch = "master" , features = ["llvm13-0"]}
 thiserror = "1.0"
-typed-arena = "2.0.1"
 miette = { version = "4.3", features = ["fancy"] }
 tree-sitter = "0.20.6"
 tree-sitter-sysy = {path = "./tree-sitter-sysy"}
 colored = "2"
 itertools = "*"
-hash-chain = "0.3.2"
