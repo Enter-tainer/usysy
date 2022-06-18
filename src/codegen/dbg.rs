@@ -1,7 +1,10 @@
+use colored::Colorize;
+
 use super::Generator;
 
 impl<'ctx, 'node> Generator<'ctx, 'node> {
   pub fn print_function_proto(&self) {
+    println!("{}", "function protos: ".bold());
     for (name, (return_type, params, va_arg)) in &self.function_map {
       let mut param_str = String::from("(");
       for (name, ty) in params {
@@ -15,6 +18,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     }
   }
   pub fn print_global_var(&self) {
+    println!("{}", "global vars: ".bold());
     for (name, (ty, _)) in &self.val_map_block_stack[0] {
       println!("{name}: {ty}");
     }

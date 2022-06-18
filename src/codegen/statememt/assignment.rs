@@ -4,7 +4,7 @@ use tree_sitter::Node;
 
 use super::{BaseType, Generator};
 impl<'ctx, 'node> Generator<'ctx, 'node> {
-  pub(super) fn generate_while_statement(&mut self, root: Node) -> Result<()> {
+  pub(super) fn generate_assignment_statement(&mut self, root: Node) -> Result<()> {
     Ok(())
   }
 }

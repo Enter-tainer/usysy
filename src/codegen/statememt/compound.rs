@@ -4,7 +4,7 @@ use tree_sitter::Node;
 
 use super::{BaseType, Generator};
 impl<'ctx, 'node> Generator<'ctx, 'node> {
-  pub(self) fn generate_compound_statement(&mut self, root: Node) -> Result<()> {
+  pub(super) fn generate_compound_statement(&mut self, root: Node) -> Result<()> {
     Ok(())
   }
 }

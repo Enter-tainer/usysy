@@ -1,7 +1,7 @@
 mod cli;
+mod codegen;
 mod error;
 mod parser;
-mod codegen;
 use clap::Parser;
 use cli::Args;
 use codegen::Generator;

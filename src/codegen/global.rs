@@ -8,14 +8,14 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     let mut cursor = root.walk();
     for node in useful_children(&root, &mut cursor) {
       match node.kind() {
-        "function_definition" =>  self.generate_function_proto(node)?,
+        "function_definition" => self.generate_function_proto(node)?,
         "declaration" => self.generate_global_var(node)?,
         _ => {}
       }
     }
     self.print_function_proto();
     self.print_global_var();
-    
+
     Ok(())
   }
 

@@ -10,7 +10,7 @@ use tree_sitter::Node;
 use super::{BaseType, Generator, MBasicType};
 
 impl<'ctx, 'node> Generator<'ctx, 'node> {
-  pub (super) fn insert_to_val_map(
+  pub(super) fn insert_to_val_map(
     &mut self,
     var_type: &MBasicType<'node>,
     identifier: &str,
@@ -19,10 +19,10 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     let local_map = self.val_map_block_stack.last_mut().unwrap();
 
     if local_map.contains_key(identifier) {
-      return Err(Error::DuplicateGlobalSymbol{
+      return Err(Error::DuplicateGlobalSymbol {
         src: NamedSource::new(self.file.name, self.file.content.to_string()),
         range: (0..15).into(),
-    });
+      });
     }
 
     local_map.insert(identifier.to_string(), (var_type.clone(), ptr));

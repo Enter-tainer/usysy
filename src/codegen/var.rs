@@ -72,7 +72,6 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     Ok(())
   }
   pub(super) fn generate_local_var(&mut self, root: Node) -> Result<()> {
-
     Ok(())
   }
 }

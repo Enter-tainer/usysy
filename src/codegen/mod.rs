@@ -1,10 +1,10 @@
 mod dbg;
+mod expression;
 mod function;
 mod global;
-mod var;
 mod statememt;
-mod expression;
 mod utils;
+mod var;
 use std::{
   collections::{HashMap, VecDeque},
   fmt::Display,
