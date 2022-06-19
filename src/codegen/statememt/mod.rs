@@ -45,6 +45,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
           self.builder.build_return(None);
         };
       }
+      "comment" => {}
       _ => unreachable!("unknown statement type {stat_type}"),
     }
     Ok(())

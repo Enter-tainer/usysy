@@ -109,7 +109,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     let declarators = {
       let mut cursor = root.walk();
       useful_children(&root, &mut cursor)
-        .skip(1) // skip first ty
+        .filter(|node| node.kind() == "declarator")
         .collect_vec()
     };
     for declarator in declarators {
