@@ -22,5 +22,13 @@ pub enum Error {
     #[label("duplicate symbol here")]
     range: SourceSpan,
   },
+  #[error("missing variable")]
+  #[diagnostic()]
+  VariableNotFound {
+    #[source_code]
+    src: NamedSource,
+    #[label("this variable cannot be found")]
+    range: SourceSpan,
+  },
 }
 pub type Result<T> = std::result::Result<T, Error>;

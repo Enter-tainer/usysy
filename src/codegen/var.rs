@@ -78,7 +78,15 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     } else {
       let local_value = self.builder.build_alloca(llvm_type, name_str);
       self.builder.build_store(local_value, initializer);
-      self.insert_to_val_map(&MBasicType { is_const, base_type: ty }, name_str, local_value, declarator.range())?;
+      self.insert_to_val_map(
+        &MBasicType {
+          is_const,
+          base_type: ty,
+        },
+        name_str,
+        local_value,
+        declarator.range(),
+      )?;
     }
     Ok(())
   }
