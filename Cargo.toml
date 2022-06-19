@@ -4,7 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "sysy"
+path = "src/main.rs"
 
+[lib]
+name = "sysy"
+path = "src/lib.rs"
+crate-type = ["rlib", "cdylib"]
 [dependencies]
 clap = { version = "3.2", features = ["derive"] }
 inkwell = { git = "https://github.com/TheDan64/inkwell", branch = "master" , features = ["llvm13-0"]}
@@ -17,3 +24,7 @@ itertools = "*"
 phf = { version = "0.10", features = ["macros"] }
 lexical = "6.1.1"
 parse_int = { version = "0.6.0", features = ["implicit-octal"] }
+libtest-mimic = "0.4"
+[[test]]
+name = "sysy-tests"
+harness = false

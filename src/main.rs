@@ -1,15 +1,15 @@
 mod cli;
-mod codegen;
-mod error;
-mod parser;
 use std::{path::Path, process::Command};
 
 use clap::Parser;
 use cli::Args;
-use codegen::Generator;
 use inkwell::context::Context;
 use miette::{IntoDiagnostic, Result};
-use parser::{dump_node, parse};
+use sysy::parser::{dump_node, parse};
+use sysy::{
+  codegen::Generator,
+  util::{compile_with_clang, get_bc_exe_path},
+};
 fn main() -> Result<()> {
   let Args {
     input,
@@ -34,8 +34,7 @@ fn main() -> Result<()> {
     gen.print_global_var();
   }
   let base = Path::new(&input);
-  let bc_path = format!("{}.bc", base.file_stem().unwrap().to_str().unwrap());
-  let exe_path = format!("{}.exe", base.file_stem().unwrap().to_str().unwrap());
+  let (bc_path, exe_path) = get_bc_exe_path(base);
   if ir_enable || exe_enable {
     gen.write(&bc_path);
   }
@@ -43,14 +42,7 @@ fn main() -> Result<()> {
     Command::new("llvm-dis").arg(&bc_path).output().unwrap();
   }
   if exe_enable {
-    Command::new("clang")
-      .args([
-        &bc_path,
-        "./compiler2022/runtime/sylib.c",
-        &format!("-o{}", exe_path),
-      ])
-      .spawn()
-      .unwrap();
+    compile_with_clang(&bc_path,&exe_path);
   }
 
   Ok(())

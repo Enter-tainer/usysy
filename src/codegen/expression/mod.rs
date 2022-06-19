@@ -4,7 +4,7 @@ mod identifier;
 mod literal;
 mod subscript;
 mod unary;
-use inkwell::values::BasicValueEnum;
+use inkwell::values::{BasicValue, BasicValueEnum};
 use tree_sitter::Node;
 
 use super::{BaseType, Generator};
@@ -23,6 +23,10 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
         let child = root.named_child(0).unwrap();
         self.generate_expression(child)
       }
+      ";" => Ok((
+        BaseType::Int,
+        self.context.i32_type().const_zero().as_basic_value_enum(),
+      )),
       _ => unreachable!("unknown expression kind {}", root.kind()),
     }
   }
