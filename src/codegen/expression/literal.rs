@@ -1,4 +1,5 @@
 use inkwell::values::{BasicValue, BasicValueEnum};
+use lexical::{format::STANDARD, parse_with_options};
 use miette::NamedSource;
 use tree_sitter::Node;
 
@@ -12,12 +13,15 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     &self,
     root: Node,
   ) -> Result<(BaseType, BasicValueEnum<'ctx>)> {
-    let lit = get_text(root, self.file.content)
-      .parse::<f32>()
-      .map_err(|_| Error::ParseLiteralFailed {
-        src: NamedSource::new(self.file.name, self.file.content.to_string()),
-        range: to_source_span(root.range()),
-      })?;
+    let lit = get_text(root, self.file.content);
+    let lit = parse_with_options::<f32, _, STANDARD>(
+      lit.as_bytes(),
+      &lexical::parse_float_options::C_LITERAL,
+    )
+    .map_err(|_| Error::ParseLiteralFailed {
+      src: NamedSource::new(self.file.name, self.file.content.to_string()),
+      range: to_source_span(root.range()),
+    })?;
     Ok((
       BaseType::Int,
       self
@@ -31,12 +35,11 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     &self,
     root: Node,
   ) -> Result<(BaseType, BasicValueEnum<'ctx>)> {
-    let lit = get_text(root, self.file.content)
-      .parse::<i32>()
-      .map_err(|_| Error::ParseLiteralFailed {
-        src: NamedSource::new(self.file.name, self.file.content.to_string()),
-        range: to_source_span(root.range()),
-      })?;
+    let lit = get_text(root, self.file.content);
+    let lit: i32 = parse_int::parse(lit).map_err(|_| Error::ParseLiteralFailed {
+      src: NamedSource::new(self.file.name, self.file.content.to_string()),
+      range: to_source_span(root.range()),
+    })?;
     Ok((
       BaseType::Int,
       self

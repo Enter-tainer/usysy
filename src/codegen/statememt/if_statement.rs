@@ -1,4 +1,5 @@
 use crate::error::Result;
+use inkwell::types::IntMathType;
 use tree_sitter::Node;
 
 use super::Generator;
@@ -13,16 +14,23 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     let consequence = root.child_by_field_name("consequence").unwrap();
     let alternative = root.child_by_field_name("alternative");
     let cond_expr = self.generate_expression(cond)?.1.into_int_value();
+    let cond_expr_i1 = self
+      .builder
+      .build_int_cast(cond_expr, self.context.bool_type(), "cond_i1");
     self
       .builder
-      .build_conditional_branch(cond_expr, consequence_block, alternative_block);
+      .build_conditional_branch(cond_expr_i1, consequence_block, alternative_block);
     self.builder.position_at_end(consequence_block);
     self.generate_statement(consequence)?;
-    self.builder.build_unconditional_branch(after_block);
+    if self.no_terminator() {
+      self.builder.build_unconditional_branch(after_block);
+    }
     if let Some(alternative) = alternative {
       self.builder.position_at_end(alternative_block);
       self.generate_statement(alternative)?;
-      self.builder.build_unconditional_branch(after_block);
+      if self.no_terminator() {
+        self.builder.build_unconditional_branch(after_block);
+      }
     }
     self.builder.position_at_end(after_block);
     Ok(())

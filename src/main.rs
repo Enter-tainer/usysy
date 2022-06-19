@@ -11,13 +11,13 @@ use parser::{dump_node, parse};
 fn main() -> Result<()> {
   let Args { input, ast } = cli::Args::parse();
   let file = std::fs::read_to_string(&input).into_diagnostic()?;
-  let tree = parse(&file).into_diagnostic()?;
+  let tree = parse(&file)?;
   if ast {
     dump_node(&tree.root_node(), &file);
   }
   let ctx = Context::create();
   let mut gen = Generator::new(&ctx, &input, &file);
-  gen.gen(&tree).into_diagnostic()?;
+  gen.gen(&tree)?;
   gen.write("res.bc");
   Ok(())
 }

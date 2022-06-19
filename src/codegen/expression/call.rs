@@ -13,7 +13,8 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     &self,
     root: Node,
   ) -> Result<(BaseType, BasicValueEnum<'ctx>)> {
-    let fn_name = get_text(root, self.file.content);
+    let fn_node = root.child_by_field_name("function").unwrap();
+    let fn_name = get_text(fn_node, self.file.content);
     let params = root.child_by_field_name("arguments").unwrap();
     let params_expr: Vec<(BaseType, BasicValueEnum)> = {
       let mut cursor = params.walk();
@@ -27,7 +28,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
         .get(fn_name)
         .ok_or(Error::FunctionNotFound {
           src: NamedSource::new(self.file.name, self.file.content.to_string()),
-          range: to_source_span(root.range()),
+          range: to_source_span(fn_node.range()),
         })?;
     let fn_val = self.module.get_function(fn_name).unwrap();
     let ret_v = self

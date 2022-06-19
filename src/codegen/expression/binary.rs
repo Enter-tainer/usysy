@@ -137,13 +137,21 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
             self.context.i32_type().const_zero(),
             "i32ne0",
           );
+          let lhs_ne_0_i1 =
+            self
+              .builder
+              .build_int_cast(lhs_ne_0, self.context.bool_type(), "or_lhs_to_i1");
           let rhs_ne_0 = self.builder.build_int_compare(
             IntPredicate::NE,
             lhs_v.into_int_value(),
             self.context.i32_type().const_zero(),
             "i32ne0",
           );
-          let res = self.builder.build_or(lhs_ne_0, rhs_ne_0, "or");
+          let rhs_ne_0_i1 =
+            self
+              .builder
+              .build_int_cast(rhs_ne_0, self.context.bool_type(), "or_rhs_to_i1");
+          let res = self.builder.build_or(lhs_ne_0_i1, rhs_ne_0_i1, "or");
           (BaseType::Int, res.as_basic_value_enum())
         }
         t => {
@@ -158,13 +166,21 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
             self.context.i32_type().const_zero(),
             "i32ne0",
           );
+          let lhs_ne_0_i1 =
+            self
+              .builder
+              .build_int_cast(lhs_ne_0, self.context.bool_type(), "or_lhs_to_i1");
           let rhs_ne_0 = self.builder.build_int_compare(
             IntPredicate::NE,
             lhs_v.into_int_value(),
             self.context.i32_type().const_zero(),
             "i32ne0",
           );
-          let res = self.builder.build_and(lhs_ne_0, rhs_ne_0, "and");
+          let rhs_ne_0_i1 =
+            self
+              .builder
+              .build_int_cast(rhs_ne_0, self.context.bool_type(), "or_rhs_to_i1");
+          let res = self.builder.build_and(lhs_ne_0_i1, rhs_ne_0_i1, "and");
           (BaseType::Int, res.as_basic_value_enum())
         }
         t => {
@@ -173,16 +189,17 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
       },
       "==" | "!=" | ">" | "<" | ">=" | "<=" => match lhs_t {
         BaseType::Int => {
+          let res = self.builder.build_int_compare(
+            INT_COMP_OP_MAP[op],
+            lhs_v.into_int_value(),
+            rhs_v.into_int_value(),
+            "int_comp_op",
+          );
+
           let res = self
             .builder
-            .build_int_compare(
-              INT_COMP_OP_MAP[op],
-              lhs_v.into_int_value(),
-              rhs_v.into_int_value(),
-              "int_comp_op",
-            )
-            .as_basic_value_enum();
-          (BaseType::Int, res)
+            .build_int_z_extend(res, self.context.i32_type(), "comp_op_i32");
+          (BaseType::Int, res.as_basic_value_enum())
         }
         BaseType::Float => {
           let res = self

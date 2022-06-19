@@ -1,6 +1,6 @@
 use crate::{
   error::{Error, Result},
-  parser::{get_text, to_source_span, useful_children},
+  parser::{dump_node, get_text, to_source_span, useful_children},
 };
 use inkwell::module::Linkage;
 use itertools::Itertools;
@@ -50,7 +50,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
 
     let init = declarator.child_by_field_name("init");
     let initializer = if let Some(init) = init {
-      let (expr_ty, val) = self.generate_expression(init)?;
+      let (expr_ty, val) = self.generate_expression(init.child(0).unwrap())?;
       let casted = self.cast_value(&expr_ty, &val, &ty, declarator.range())?;
       casted
     } else {
@@ -95,7 +95,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     let declarators = {
       let mut cursor = root.walk();
       useful_children(&root, &mut cursor)
-        .skip(1) // skip first ty
+        .filter(|node| node.kind() == "declarator")
         .collect_vec()
     };
     for declarator in declarators {

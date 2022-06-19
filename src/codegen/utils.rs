@@ -19,6 +19,11 @@ use super::{BaseType, Generator, MBasicType};
 // pub(super) fn try_cast(src: MBasicType, dst: MBasicType)
 
 impl<'ctx, 'node> Generator<'ctx, 'node> {
+  pub(super) fn no_terminator(&self) -> bool {
+    let block = self.builder.get_insert_block();
+    let terminator = block.unwrap().get_terminator();
+    terminator.is_none()
+  }
   pub(super) fn insert_to_val_map(
     &mut self,
     var_type: &MBasicType<'node>,
