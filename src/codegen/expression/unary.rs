@@ -38,9 +38,10 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
               IntPredicate::EQ,
               self.context.i32_type().const_int(0_u64, true),
               val.into_int_value(),
-              "logical_not_result_int",
+              "logical_not_result_i1",
             );
-            result_int.as_basic_value_enum()
+            let result_int_i32 = self.builder.build_int_cast(result_int, self.context.i32_type(), "logical_not_result_i32");
+            result_int_i32.as_basic_value_enum()
           }
           _ => todo!(),
         },
