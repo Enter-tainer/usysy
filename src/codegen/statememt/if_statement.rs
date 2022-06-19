@@ -4,11 +4,11 @@ use tree_sitter::Node;
 use super::Generator;
 impl<'ctx, 'node> Generator<'ctx, 'node> {
   pub(super) fn generate_if_statement(&mut self, root: Node) -> Result<()> {
-    let func_val = self.current_function.as_ref().unwrap().0;
+    let current_fn = self.current_function.as_ref().unwrap().0;
 
-    let consequence_block = self.context.append_basic_block(func_val, "if_block");
-    let alternative_block = self.context.append_basic_block(func_val, "else_block");
-    let after_block = self.context.append_basic_block(func_val, "after_block");
+    let consequence_block = self.context.append_basic_block(current_fn, "if_block");
+    let alternative_block = self.context.append_basic_block(current_fn, "else_block");
+    let after_block = self.context.append_basic_block(current_fn, "after_block");
     let cond = root.child_by_field_name("condition").unwrap();
     let consequence = root.child_by_field_name("consequence").unwrap();
     let alternative = root.child_by_field_name("alternative");
