@@ -131,9 +131,13 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
       },
       "||" => match lhs_t {
         BaseType::Int => {
+          let lhs_i32 =
+            self
+              .builder
+              .build_int_cast(lhs_v.into_int_value(), self.context.i32_type(), "lhs_i32");
           let lhs_ne_0 = self.builder.build_int_compare(
             IntPredicate::NE,
-            lhs_v.into_int_value(),
+            lhs_i32,
             self.context.i32_type().const_zero(),
             "i32ne0",
           );
@@ -141,9 +145,13 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
             self
               .builder
               .build_int_cast(lhs_ne_0, self.context.bool_type(), "or_lhs_to_i1");
+          let rhs_i32 =
+            self
+              .builder
+              .build_int_cast(rhs_v.into_int_value(), self.context.i32_type(), "rhs_i32");
           let rhs_ne_0 = self.builder.build_int_compare(
             IntPredicate::NE,
-            rhs_v.into_int_value(),
+            rhs_i32,
             self.context.i32_type().const_zero(),
             "i32ne0",
           );
@@ -160,9 +168,13 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
       },
       "&&" => match lhs_t {
         BaseType::Int => {
+          let lhs_i32 =
+            self
+              .builder
+              .build_int_cast(lhs_v.into_int_value(), self.context.i32_type(), "lhs_i32");
           let lhs_ne_0 = self.builder.build_int_compare(
             IntPredicate::NE,
-            lhs_v.into_int_value(),
+            lhs_i32,
             self.context.i32_type().const_zero(),
             "i32ne0",
           );
@@ -170,9 +182,13 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
             self
               .builder
               .build_int_cast(lhs_ne_0, self.context.bool_type(), "or_lhs_to_i1");
+          let rhs_i32 =
+            self
+              .builder
+              .build_int_cast(rhs_v.into_int_value(), self.context.i32_type(), "rhs_i32");
           let rhs_ne_0 = self.builder.build_int_compare(
             IntPredicate::NE,
-            rhs_v.into_int_value(),
+            rhs_i32,
             self.context.i32_type().const_zero(),
             "i32ne0",
           );
@@ -189,12 +205,18 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
       },
       "==" | "!=" | ">" | "<" | ">=" | "<=" => match lhs_t {
         BaseType::Int => {
-          let res = self.builder.build_int_compare(
-            INT_COMP_OP_MAP[op],
-            lhs_v.into_int_value(),
-            rhs_v.into_int_value(),
-            "int_comp_op",
-          );
+          let lhs_i32 =
+            self
+              .builder
+              .build_int_cast(lhs_v.into_int_value(), self.context.i32_type(), "lhs_i32");
+          let rhs_i32 =
+            self
+              .builder
+              .build_int_cast(rhs_v.into_int_value(), self.context.i32_type(), "rhs_i32");
+          let res =
+            self
+              .builder
+              .build_int_compare(INT_COMP_OP_MAP[op], lhs_i32, rhs_i32, "int_comp_op");
 
           let res = self
             .builder

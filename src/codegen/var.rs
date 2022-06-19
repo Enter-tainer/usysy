@@ -2,7 +2,6 @@ use crate::{
   error::{Error, Result},
   parser::{get_text, to_source_span, useful_children},
 };
-use inkwell::module::Linkage;
 use itertools::Itertools;
 use miette::NamedSource;
 use tree_sitter::Node;
