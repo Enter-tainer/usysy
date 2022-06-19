@@ -6,14 +6,13 @@ use tree_sitter::Node;
 use super::{BaseType, Generator};
 use crate::{
   error::{Error, Result},
-  parser::{dump_node, get_text, to_source_span, useful_children},
+  parser::{get_text, to_source_span, useful_children},
 };
 impl<'ctx, 'node> Generator<'ctx, 'node> {
   pub(super) fn generate_call_expression(
     &self,
     root: Node,
   ) -> Result<(BaseType, BasicValueEnum<'ctx>)> {
-    dump_node(&root, self.file.content);
     let fn_node = root.child_by_field_name("function").unwrap();
     let fn_name = get_text(fn_node, self.file.content);
     let params = root.child_by_field_name("arguments").unwrap();
