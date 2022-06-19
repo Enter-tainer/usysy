@@ -9,7 +9,8 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     root: Node,
   ) -> Result<(BaseType, BasicValueEnum<'ctx>)> {
     let var_name = get_text(root, self.file.content);
-    let var = self.get_in_value_map(var_name, root.range())?;
-    Ok((var.0.base_type, var.1.as_basic_value_enum()))
+    let (ty, var) = self.get_in_value_map(var_name, root.range())?;
+    let val = self.builder.build_load(var, "load_val");
+    Ok((ty.base_type, val.as_basic_value_enum()))
   }
 }

@@ -1,3 +1,5 @@
 /target
 compiler2022
 .vscode
+*.ll
+*.bc

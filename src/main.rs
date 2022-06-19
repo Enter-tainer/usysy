@@ -18,5 +18,6 @@ fn main() -> Result<()> {
   let ctx = Context::create();
   let mut gen = Generator::new(&ctx, &input, &file);
   gen.gen(&tree).into_diagnostic()?;
+  gen.write("res.bc");
   Ok(())
 }

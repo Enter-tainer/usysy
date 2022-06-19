@@ -14,3 +14,4 @@ tree-sitter = "0.20.6"
 tree-sitter-sysy = {path = "./tree-sitter-sysy"}
 colored = "2"
 itertools = "*"
+phf = { version = "0.10", features = ["macros"] }
