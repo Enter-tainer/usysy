@@ -58,10 +58,10 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     };
     if is_global {
       let global_value = self.module.add_global(llvm_type, None, name_str);
-      global_value.set_linkage(Linkage::Common);
-      if is_const {
-        global_value.set_constant(true);
-      }
+      // global_value.set_linkage(Linkage::Common);
+      // if is_const {
+      //   global_value.set_constant(true);
+      // }
       global_value.set_initializer(&initializer);
       self.val_map_block_stack[0].insert(
         name_str.to_string(),
