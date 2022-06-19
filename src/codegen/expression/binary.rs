@@ -143,7 +143,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
               .build_int_cast(lhs_ne_0, self.context.bool_type(), "or_lhs_to_i1");
           let rhs_ne_0 = self.builder.build_int_compare(
             IntPredicate::NE,
-            lhs_v.into_int_value(),
+            rhs_v.into_int_value(),
             self.context.i32_type().const_zero(),
             "i32ne0",
           );
@@ -172,7 +172,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
               .build_int_cast(lhs_ne_0, self.context.bool_type(), "or_lhs_to_i1");
           let rhs_ne_0 = self.builder.build_int_compare(
             IntPredicate::NE,
-            lhs_v.into_int_value(),
+            rhs_v.into_int_value(),
             self.context.i32_type().const_zero(),
             "i32ne0",
           );

@@ -3,8 +3,8 @@ use tree_sitter::Node;
 
 use super::Generator;
 impl<'ctx, 'node> Generator<'ctx, 'node> {
-  pub(super) fn generate_expression_statement(&mut self, _root: Node) -> Result<()> {
-    // do nothing, because single expr has no effect.
+  pub(super) fn generate_expression_statement(&mut self, root: Node) -> Result<()> {
+    self.generate_expression(root.child(0).unwrap())?;
     Ok(())
   }
 }

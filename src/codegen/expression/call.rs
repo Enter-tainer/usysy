@@ -6,13 +6,14 @@ use tree_sitter::Node;
 use super::{BaseType, Generator};
 use crate::{
   error::{Error, Result},
-  parser::{get_text, to_source_span, useful_children},
+  parser::{dump_node, get_text, to_source_span, useful_children},
 };
 impl<'ctx, 'node> Generator<'ctx, 'node> {
   pub(super) fn generate_call_expression(
     &self,
     root: Node,
   ) -> Result<(BaseType, BasicValueEnum<'ctx>)> {
+    dump_node(&root, self.file.content);
     let fn_node = root.child_by_field_name("function").unwrap();
     let fn_name = get_text(fn_node, self.file.content);
     let params = root.child_by_field_name("arguments").unwrap();
@@ -43,7 +44,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
       )
       .try_as_basic_value()
       .left();
-    if fn_ret_ty.base_type == BaseType::Void && ret_v.is_none()
+    if fn_ret_ty.base_type == BaseType::Void
       || fn_ret_ty.base_type != BaseType::Void && ret_v.is_some()
     {
       Ok((

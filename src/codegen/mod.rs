@@ -159,6 +159,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
   }
   pub fn gen(&mut self, ast: &Tree) -> Result<()> {
     let root = ast.root_node();
+    self.generate_builtin_function()?;
     self.generate_global_proto(root)?;
     self.generate_global_definition(root)?;
     Ok(())

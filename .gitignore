@@ -3,3 +3,4 @@ compiler2022
 .vscode
 *.ll
 *.bc
+a.out

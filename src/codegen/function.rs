@@ -5,6 +5,7 @@ use crate::{
   parser::{get_text, to_source_span, useful_children},
 };
 use inkwell::{
+  module::Linkage,
   types::{BasicMetadataTypeEnum, BasicType},
   values::BasicValue,
 };
@@ -138,6 +139,158 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
 
     self.val_map_block_stack.pop();
     self.current_function = None;
+    Ok(())
+  }
+  // /* Input & output functions */
+  // int getint(),getch(),getarray(int a[]);
+  // float getfloat();
+  // int getfarray(float a[]);
+  //
+  // void putint(int a),putch(int a),putarray(int n,int a[]);
+  // void putfloat(float a);
+  // void putfarray(int n, float a[]);
+  //
+  // void putf(char a[], ...);
+  pub(super) fn generate_builtin_function(&mut self) -> Result<()> {
+    let functions = [
+      (
+        "getint",
+        (
+          MBasicType {
+            is_const: false,
+            base_type: BaseType::Int,
+          },
+          Vec::new(),
+          false,
+        ),
+      ),
+      (
+        "getch",
+        (
+          MBasicType {
+            is_const: false,
+            base_type: BaseType::Int,
+          },
+          Vec::new(),
+          false,
+        ),
+      ),
+      // (
+      //   "getarray",
+      //   (
+      //     MBasicType {
+      //       is_const: false,
+      //       base_type: BaseType::Int,
+      //     },
+      //     vec![(
+      //       "input_array",
+      //       MBasicType {
+      //         is_const: false,
+      //         base_type: BaseType::Array(Box::new(BaseType::Int), vec![]),
+      //       },
+      //     )],
+      //     false,
+      //   ),
+      // ),
+      (
+        "getfloat",
+        (
+          MBasicType {
+            is_const: false,
+            base_type: BaseType::Float,
+          },
+          Vec::new(),
+          false,
+        ),
+      ),
+      // (
+      //   "getfarray",
+      //   (
+      //     MBasicType {
+      //       is_const: false,
+      //       base_type: BaseType::Int,
+      //     },
+      //     vec![(
+      //       "input_array",
+      //       MBasicType {
+      //         is_const: false,
+      //         base_type: BaseType::Array(Box::new(BaseType::Float), vec![]),
+      //       },
+      //     )],
+      //     false,
+      //   ),
+      // ),
+      (
+        "putint",
+        (
+          MBasicType {
+            is_const: false,
+            base_type: BaseType::Void,
+          },
+          vec![(
+            "output_int",
+            MBasicType {
+              is_const: false,
+              base_type: BaseType::Int,
+            },
+          )],
+          false,
+        ),
+      ),
+      (
+        "putch",
+        (
+          MBasicType {
+            is_const: false,
+            base_type: BaseType::Void,
+          },
+          vec![(
+            "output_ch",
+            MBasicType {
+              is_const: false,
+              base_type: BaseType::Int,
+            },
+          )],
+          false,
+        ),
+      ),
+      (
+        "putfloat",
+        (
+          MBasicType {
+            is_const: false,
+            base_type: BaseType::Void,
+          },
+          vec![(
+            "output_float",
+            MBasicType {
+              is_const: false,
+              base_type: BaseType::Float,
+            },
+          )],
+          false,
+        ),
+      ),
+    ];
+    for func @ (name, (ret_ty, params, is_va_arg)) in &functions {
+      self.function_map.insert(func.0.to_string(), func.1.clone());
+      let llvm_params = params
+        .iter()
+        .map(|(_, param_type)| param_type.base_type.to_llvm_type(self.context))
+        .collect_vec();
+      let meta_params = llvm_params
+        .iter()
+        .map(|ty| BasicMetadataTypeEnum::from(*ty))
+        .collect::<Vec<BasicMetadataTypeEnum>>();
+      let fn_ty = ret_ty
+        .base_type
+        .to_llvm_type(self.context)
+        // TODO: va arg
+        .fn_type(&meta_params, *is_va_arg);
+      self
+        .module
+        .add_function(name, fn_ty, Some(Linkage::External));
+    }
     Ok(())
   }
 }
