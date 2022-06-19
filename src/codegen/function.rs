@@ -114,23 +114,23 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     let stat = function.child_by_field_name("body").unwrap();
     self.generate_statement(stat)?;
 
-    let mut iter_block = func.get_first_basic_block();
-    while let Some(block) = iter_block {
-      if block.get_terminator().is_none() {
-        let terminator_builder = self.context.create_builder();
-        terminator_builder.position_at_end(block);
-        match func_ty.base_type {
-          BaseType::Void => {
-            terminator_builder.build_return(None);
-          }
-          _ => {
-            let null_val = self.context.i32_type().const_zero();
-            terminator_builder.build_return(Some(&null_val));
-          }
-        }
-      }
-      iter_block = block.get_next_basic_block();
-    }
+    // let mut iter_block = func.get_first_basic_block();
+    // while let Some(block) = iter_block {
+    //   if block.get_terminator().is_none() {
+    //     let terminator_builder = self.context.create_builder();
+    //     terminator_builder.position_at_end(block);
+    //     match func_ty.base_type {
+    //       BaseType::Void => {
+    //         terminator_builder.build_return(None);
+    //       }
+    //       _ => {
+    //         let null_val = self.context.i32_type().const_zero();
+    //         terminator_builder.build_return(Some(&null_val));
+    //       }
+    //     }
+    //   }
+    //   iter_block = block.get_next_basic_block();
+    // }
 
     if !func.verify(true) {
       func.print_to_stderr();

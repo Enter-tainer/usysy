@@ -1,5 +1,4 @@
 use crate::error::Result;
-use inkwell::types::IntMathType;
 use tree_sitter::Node;
 
 use super::Generator;
@@ -25,12 +24,12 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     if self.no_terminator() {
       self.builder.build_unconditional_branch(after_block);
     }
+    self.builder.position_at_end(alternative_block);
     if let Some(alternative) = alternative {
-      self.builder.position_at_end(alternative_block);
       self.generate_statement(alternative)?;
-      if self.no_terminator() {
-        self.builder.build_unconditional_branch(after_block);
-      }
+    }
+    if self.no_terminator() {
+      self.builder.build_unconditional_branch(after_block);
     }
     self.builder.position_at_end(after_block);
     Ok(())
