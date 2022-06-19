@@ -30,5 +30,13 @@ pub enum Error {
     #[label("this variable cannot be found")]
     range: SourceSpan,
   },
+  #[error("keyword not in a loop")]
+  #[diagnostic()]
+  KeywordNotInLoop {
+    #[source_code]
+    src: NamedSource,
+    #[label("this keyword can only use in a loop")]
+    range: SourceSpan,
+  },
 }
 pub type Result<T> = std::result::Result<T, Error>;
