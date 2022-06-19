@@ -51,10 +51,8 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     let init = declarator.child_by_field_name("init");
     let initializer = if let Some(init) = init {
       let (expr_ty, val) = self.generate_expression(init)?;
-      if expr_ty == BaseType::Int && ty == BaseType::Float {
-        todo!("int -> float cast not supported");
-      }
-      val
+      let casted = self.cast_value(&expr_ty, &val, &ty, declarator.range())?;
+      casted
     } else {
       llvm_type.const_zero()
     };

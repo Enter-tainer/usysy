@@ -2,7 +2,14 @@ use crate::{
   error::{Error, Result},
   parser::{get_text, to_source_span, useful_children},
 };
-use inkwell::{module::Linkage, values::PointerValue};
+use inkwell::{
+  module::Linkage,
+  values::{
+    BasicValueEnum,
+    InstructionOpcode::{FPToSI, SIToFP},
+    PointerValue,
+  },
+};
 use itertools::Itertools;
 use miette::NamedSource;
 use tree_sitter::{Node, Range};
@@ -46,5 +53,35 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
       src: NamedSource::new(self.file.name, self.file.content.to_string()),
       range: to_source_span(range),
     })
+  }
+
+  pub(crate) fn cast_value(
+    &self,
+    curr_type: &BaseType,
+    curr_val: &BasicValueEnum<'ctx>,
+    dest_type: &BaseType,
+    range: Range,
+  ) -> Result<BasicValueEnum<'ctx>> {
+    if curr_type == dest_type {
+      return Ok(curr_val.to_owned());
+    }
+
+    let llvm_type = dest_type.to_llvm_type(self.context);
+
+    Ok(self.builder.build_cast(
+      match (curr_type, dest_type) {
+        (BaseType::Int, BaseType::Float) => SIToFP,
+        (BaseType::Float, BaseType::Int) => FPToSI,
+        _ => {
+          return Err(Error::InvalidCast {
+            src: NamedSource::new(self.file.name, self.file.content.to_string()),
+            range: to_source_span(range),
+          })
+        }
+      },
+      *curr_val,
+      llvm_type,
+      "cast",
+    ))
   }
 }

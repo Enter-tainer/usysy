@@ -46,5 +46,21 @@ pub enum Error {
     #[label("can not parse this literal")]
     range: SourceSpan,
   },
+  #[error("target function not found")]
+  #[diagnostic()]
+  FunctionNotFound {
+    #[source_code]
+    src: NamedSource,
+    #[label("can not found this function")]
+    range: SourceSpan,
+  },
+  #[error("invalid cast")]
+  #[diagnostic()]
+  InvalidCast {
+    #[source_code]
+    src: NamedSource,
+    #[label("invalid cast here")]
+    range: SourceSpan,
+  },
 }
 pub type Result<T> = std::result::Result<T, Error>;
