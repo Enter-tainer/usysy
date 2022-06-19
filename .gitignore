@@ -4,3 +4,4 @@ compiler2022
 *.ll
 *.bc
 a.out
+*.exe
