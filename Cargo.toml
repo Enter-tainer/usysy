@@ -16,4 +16,4 @@ colored = "2"
 itertools = "*"
 phf = { version = "0.10", features = ["macros"] }
 lexical = "6.1.1"
-parse_int = "0.6.0"
+parse_int = { version = "0.6.0", features = ["implicit-octal"] }
