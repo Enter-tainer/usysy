@@ -1,6 +1,6 @@
 use crate::{
   error::{Error, Result},
-  parser::{dump_node, get_text, to_source_span, useful_children},
+  parser::{get_text, to_source_span, useful_children},
 };
 use inkwell::module::Linkage;
 use itertools::Itertools;

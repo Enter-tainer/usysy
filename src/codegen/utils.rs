@@ -1,18 +1,17 @@
 use crate::{
   error::{Error, Result},
-  parser::{get_text, to_source_span, useful_children},
+  parser::{to_source_span},
 };
 use inkwell::{
-  module::Linkage,
   values::{
     BasicValueEnum,
     InstructionOpcode::{FPToSI, SIToFP},
     PointerValue,
   },
 };
-use itertools::Itertools;
+
 use miette::NamedSource;
-use tree_sitter::{Node, Range};
+use tree_sitter::{Range};
 
 use super::{BaseType, Generator, MBasicType};
 

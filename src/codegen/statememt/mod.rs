@@ -11,7 +11,7 @@ use crate::{
 use miette::NamedSource;
 use tree_sitter::Node;
 
-use super::{BaseType, Generator};
+use super::{Generator};
 impl<'ctx, 'node> Generator<'ctx, 'node> {
   pub(super) fn generate_statement(&mut self, root: Node) -> Result<()> {
     let stat_type = root.kind();
@@ -39,7 +39,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
       "return_statement" => {
         let return_val = root.child_by_field_name("return_value");
         if let Some(return_val) = return_val {
-          let (ty, val) = self.generate_expression(return_val)?;
+          let (_ty, val) = self.generate_expression(return_val)?;
           self.builder.build_return(Some(&val));
         } else {
           self.builder.build_return(None);

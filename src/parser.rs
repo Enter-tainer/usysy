@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::error::{Error, Result};
 use colored::*;
 use itertools::Itertools;
-use miette::{ByteOffset, SourceCode, SourceSpan};
+use miette::{SourceSpan};
 use tree_sitter::{Node, Parser, Range, Tree, TreeCursor};
 pub fn parse(input: &str) -> Result<Tree> {
   let mut parser = Parser::new();

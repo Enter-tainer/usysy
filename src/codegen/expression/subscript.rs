@@ -6,7 +6,7 @@ use crate::error::Result;
 impl<'ctx, 'node> Generator<'ctx, 'node> {
   pub(super) fn generate_subscript_expression(
     &self,
-    root: Node,
+    _root: Node,
   ) -> Result<(BaseType, BasicValueEnum<'ctx>)> {
     Ok((
       BaseType::Int,

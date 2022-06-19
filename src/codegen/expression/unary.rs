@@ -1,5 +1,4 @@
 use inkwell::{
-  types::BasicType,
   values::{BasicValue, BasicValueEnum},
   IntPredicate,
 };
