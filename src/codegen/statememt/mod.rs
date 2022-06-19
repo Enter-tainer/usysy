@@ -8,10 +8,11 @@ use crate::{
   error::{Error, Result},
   parser::to_source_span,
 };
+use inkwell::values::BasicValue;
 use miette::NamedSource;
 use tree_sitter::Node;
 
-use super::{Generator};
+use super::Generator;
 impl<'ctx, 'node> Generator<'ctx, 'node> {
   pub(super) fn generate_statement(&mut self, root: Node) -> Result<()> {
     let stat_type = root.kind();
@@ -42,7 +43,9 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
           let (_ty, val) = self.generate_expression(return_val)?;
           self.builder.build_return(Some(&val));
         } else {
-          self.builder.build_return(None);
+          self.builder.build_return(Some(
+            &self.context.i8_type().const_zero().as_basic_value_enum(),
+          ));
         };
       }
       "comment" => {}

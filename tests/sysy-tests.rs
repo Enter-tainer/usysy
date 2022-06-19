@@ -1,6 +1,7 @@
 extern crate libtest_mimic;
 
 use inkwell::context::Context;
+use itertools::Itertools;
 use libtest_mimic::{run_tests, Arguments, Outcome, Test};
 use sysy::{codegen::Generator, parser::parse, util::get_bc_exe_path};
 
@@ -84,7 +85,7 @@ fn run_test(test: &Test<PathBuf>) -> Outcome {
       tmp.set_extension("out");
       tmp
     };
-    let expected_out = std::fs::read_to_string(expected_out_path).unwrap();
+    let expected_output = std::fs::read_to_string(expected_out_path).unwrap();
     let input = std::fs::read_to_string(path).unwrap();
     let tree = parse(&input).unwrap();
     let ctx = Context::create();
@@ -122,7 +123,9 @@ fn run_test(test: &Test<PathBuf>) -> Outcome {
     let stdout = String::from_utf8(stdout).unwrap();
     let ret_code = run_cmd.status.code().unwrap();
     let actual_output = format!("{}\n{}", stdout.trim(), ret_code);
-    assert_eq!(expected_out.trim(), actual_output.trim());
+    let actual_output = actual_output.lines().map(|l| l.trim()).join("\n");
+    let expected_output = expected_output.lines().map(|l| l.trim()).join("\n");
+    assert_eq!(expected_output.trim(), actual_output.trim());
   });
   match res {
     Ok(_) => Outcome::Passed,
