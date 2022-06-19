@@ -38,5 +38,13 @@ pub enum Error {
     #[label("this keyword can only use in a loop")]
     range: SourceSpan,
   },
+  #[error("failed to parse literal")]
+  #[diagnostic()]
+  ParseLiteralFailed {
+    #[source_code]
+    src: NamedSource,
+    #[label("can not parse this literal")]
+    range: SourceSpan,
+  },
 }
 pub type Result<T> = std::result::Result<T, Error>;

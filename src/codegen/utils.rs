@@ -36,7 +36,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
     &self,
     identifier: &str,
     range: Range,
-  ) -> Result<(MBasicType, PointerValue)> {
+  ) -> Result<(MBasicType, PointerValue<'ctx>)> {
     for map in self.val_map_block_stack.iter().rev() {
       if map.contains_key(identifier) {
         return Ok(map[identifier].clone());
