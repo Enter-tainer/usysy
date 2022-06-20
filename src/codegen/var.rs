@@ -2,6 +2,7 @@ use crate::{
   error::{Error, Result},
   parser::{get_text, to_source_span, useful_children},
 };
+use inkwell::values::BasicValueEnum;
 use itertools::Itertools;
 use miette::NamedSource;
 use tree_sitter::Node;
@@ -59,9 +60,18 @@ impl<'ctx> Generator<'ctx> {
 
     let init = declarator.child_by_field_name("init");
     let initializer = if let Some(init) = init {
-      let (expr_ty, val) = self.generate_expression(init.child(0).unwrap())?;
-      let casted = self.cast_value(&expr_ty, &val, &ty, declarator.range())?;
-      casted
+      let init = init.child(0).unwrap();
+      match init.kind() {
+        "init_list" => self.generate_array_init_list(init, &ty)?,
+        "empty_init_list" => {
+          todo!()
+        }
+        _ => {
+          let (expr_ty, val) = self.generate_expression(init)?;
+          let casted = self.cast_value(&expr_ty, &val, &ty, declarator.range())?;
+          casted
+        }
+      }
     } else {
       llvm_type.const_zero()
     };
@@ -97,6 +107,15 @@ impl<'ctx> Generator<'ctx> {
     }
     Ok(())
   }
+
+  fn generate_array_init_list(
+    &self,
+    init_list: Node,
+    array_ty: &BaseType,
+  ) -> Result<BasicValueEnum> {
+    todo!()
+  }
+
   pub(super) fn generate_global_var(&mut self, root: Node) -> Result<()> {
     let ty: BaseType =
       get_text(root.child_by_field_name("type").unwrap(), self.file.content).try_into()?;

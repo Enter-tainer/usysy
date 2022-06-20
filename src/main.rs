@@ -1,4 +1,5 @@
 mod cli;
+use std::sync::mpsc;
 use std::{path::Path, process::Command};
 
 use clap::Parser;
@@ -24,26 +25,39 @@ fn main() -> Result<()> {
   if ast {
     dump_node(&tree.root_node(), &file);
   }
-  let ctx = Context::create();
-  let mut gen = Generator::new(&ctx, &input, &file);
-  gen.gen(&tree)?;
-  if prototype {
-    gen.print_function_proto();
-  }
-  if global {
-    gen.print_global_var();
-  }
-  let base = Path::new(&input);
-  let (bc_path, exe_path) = get_bc_exe_path(base);
-  if ir_enable || exe_enable {
-    gen.write(&bc_path);
-  }
-  if ir_enable {
-    Command::new("llvm-dis").arg(&bc_path).output().unwrap();
-  }
-  if exe_enable {
-    compile_with_clang(&bc_path,&exe_path);
-  }
-
+  let (rx, tx) = mpsc::channel();
+  let handle = {
+    std::thread::Builder::new()
+      .stack_size(1024 * 1024 * 16)
+      .name("gen".to_string())
+      .spawn(move || {
+        let res = || -> Result<()> {
+          let ctx = Context::create();
+          let mut gen = Generator::new(&ctx, &input, &file);
+          gen.gen(&tree)?;
+          if prototype {
+            gen.print_function_proto();
+          }
+          if global {
+            gen.print_global_var();
+          }
+          let base = Path::new(&input);
+          let (bc_path, exe_path) = get_bc_exe_path(base);
+          if ir_enable || exe_enable {
+            gen.write(&bc_path);
+          }
+          if ir_enable {
+            Command::new("llvm-dis").arg(&bc_path).output().unwrap();
+          }
+          if exe_enable {
+            compile_with_clang(&bc_path, &exe_path);
+          }
+          Ok(())
+        }();
+        rx.send(res).unwrap();
+      })
+  };
+  handle.unwrap().join().unwrap();
+  tx.recv().unwrap()?;
   Ok(())
 }

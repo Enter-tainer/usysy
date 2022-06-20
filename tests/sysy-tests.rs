@@ -13,8 +13,8 @@ use std::{
   io::Write,
   path::{Path, PathBuf},
   process::{Command, Stdio},
+  sync::mpsc,
 };
-
 
 fn main() {
   let args = Arguments::from_args();
@@ -69,69 +69,78 @@ fn collect_tests() -> Vec<Test<PathBuf>> {
 
 /// Performs a couple of tidy tests.
 fn run_test(test: &Test<PathBuf>) -> Outcome {
-  let res = std::panic::catch_unwind(|| {
-    let path = &test.data;
-    let input_file = {
-      let mut tmp = path.clone();
-      tmp.set_extension("in");
-      if tmp.exists() {
-        let content = std::fs::read_to_string(tmp).unwrap();
-        Some(content)
-      } else {
-        None
-      }
-    };
-    let expected_out_path = {
-      let mut tmp = path.clone();
-      tmp.set_extension("out");
-      tmp
-    };
-    let expected_output = std::fs::read_to_string(expected_out_path).unwrap();
-    let input = std::fs::read_to_string(path).unwrap();
-    let tree = parse(&input).unwrap();
-    let ctx = Context::create();
-    let mut gen = Generator::new(&ctx, &input, &input);
-    gen.gen(&tree).unwrap();
-    let base = Path::new(&path);
-    let (bc_path, exe_path) = get_bc_exe_path(base);
-    gen.write(&bc_path);
-    Command::new("llvm-dis").arg(&bc_path).output().unwrap();
-    Command::new("clang")
-      .args([
-        &bc_path,
-        "./compiler2022/runtime/sylib.c",
-        &format!("-o{}", exe_path),
-      ])
-      .output()
-      .unwrap();
-    let run_cmd = {
-      let mut cmd = Command::new(exe_path);
-      if let Some(input) = input_file {
-        let mut proc = cmd
-          .stdin(Stdio::piped())
-          .stdout(Stdio::piped())
-          .spawn()
+  let (rx, tx) = mpsc::channel();
+  let test = test.clone();
+  let handle = std::thread::Builder::new()
+    .stack_size(16 * 1024 * 1024)
+    .spawn(move || {
+      let res = std::panic::catch_unwind(|| {
+        let path = &test.data;
+        let input_file = {
+          let mut tmp = path.clone();
+          tmp.set_extension("in");
+          if tmp.exists() {
+            let content = std::fs::read_to_string(tmp).unwrap();
+            Some(content)
+          } else {
+            None
+          }
+        };
+        let expected_out_path = {
+          let mut tmp = path.clone();
+          tmp.set_extension("out");
+          tmp
+        };
+        let expected_output = std::fs::read_to_string(expected_out_path).unwrap();
+        let input = std::fs::read_to_string(path).unwrap();
+        let tree = parse(&input).unwrap();
+        let ctx = Context::create();
+        let mut gen = Generator::new(&ctx, &input, &input);
+        gen.gen(&tree).unwrap();
+        let base = Path::new(&path);
+        let (bc_path, exe_path) = get_bc_exe_path(base);
+        gen.write(&bc_path);
+        Command::new("llvm-dis").arg(&bc_path).output().unwrap();
+        Command::new("clang")
+          .args([
+            &bc_path,
+            "./compiler2022/runtime/sylib.c",
+            &format!("-o{}", exe_path),
+          ])
+          .output()
           .unwrap();
-        let mut stdin = proc.stdin.take().unwrap();
-        stdin.write_all(input.as_bytes()).unwrap();
-        drop(stdin);
-        proc.wait_with_output().unwrap()
-      } else {
-        cmd.output().unwrap()
-      }
-    };
-    let stdout = run_cmd.stdout;
-    let stdout = String::from_utf8(stdout).unwrap();
-    let ret_code = run_cmd.status.code().unwrap();
-    let actual_output = format!("{}\n{}", stdout.trim(), ret_code);
-    let actual_output = actual_output.lines().map(|l| l.trim()).join("\n");
-    let expected_output = expected_output.lines().map(|l| l.trim()).join("\n");
-    assert_eq!(expected_output.trim(), actual_output.trim());
-  });
-  match res {
-    Ok(_) => Outcome::Passed,
-    Err(_) => Outcome::Failed {
-      msg: Some(format!("{} failed!", test.data.display())),
-    },
-  }
+        let run_cmd = {
+          let mut cmd = Command::new(exe_path);
+          if let Some(input) = input_file {
+            let mut proc = cmd
+              .stdin(Stdio::piped())
+              .stdout(Stdio::piped())
+              .spawn()
+              .unwrap();
+            let mut stdin = proc.stdin.take().unwrap();
+            stdin.write_all(input.as_bytes()).unwrap();
+            drop(stdin);
+            proc.wait_with_output().unwrap()
+          } else {
+            cmd.output().unwrap()
+          }
+        };
+        let stdout = run_cmd.stdout;
+        let stdout = String::from_utf8(stdout).unwrap();
+        let ret_code = run_cmd.status.code().unwrap();
+        let actual_output = format!("{}\n{}", stdout.trim(), ret_code);
+        let actual_output = actual_output.lines().map(|l| l.trim()).join("\n");
+        let expected_output = expected_output.lines().map(|l| l.trim()).join("\n");
+        assert_eq!(expected_output.trim(), actual_output.trim());
+      });
+      let test_res = match res {
+        Ok(_) => Outcome::Passed,
+        Err(_) => Outcome::Failed {
+          msg: Some(format!("{} failed!", test.data.display())),
+        },
+      };
+      rx.send(test_res).unwrap();
+    });
+  handle.unwrap().join().unwrap();
+  tx.recv().unwrap()
 }
