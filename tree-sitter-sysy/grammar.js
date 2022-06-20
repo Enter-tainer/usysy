@@ -92,10 +92,10 @@ module.exports = grammar({
     parameter_list: $ => choice(
       seq('(', ')'),
       seq(
-      '(',
+        '(',
         $._parameter_list,
-      ')'
-    )),
+        ')'
+      )),
     _parameter_list: $ => commaSep1(
       $.parameter,
     ),
@@ -133,7 +133,7 @@ module.exports = grammar({
       repeat($._statement),
       '}'
     ),
-    
+
     _statement: $ => choice(
       seq($.assignment, ';'),
       $.expression_statement,
@@ -237,11 +237,16 @@ module.exports = grammar({
       }));
     },
 
-    subscript_expression: $ => prec(PREC.SUBSCRIPT, seq(
-      field('argument', $._expression),
+    subscript_indices: $ => repeat1(seq(
       '[',
-      field('index', $._expression),
+      $._expression,
       ']'
+    )
+    ),
+
+    subscript_expression: $ => prec(PREC.SUBSCRIPT, seq(
+      field('argument', $.identifier),
+      field('indices', $.subscript_indices)
     )),
 
     call_expression: $ => prec(PREC.CALL, seq(

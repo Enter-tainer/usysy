@@ -19,8 +19,7 @@ use inkwell::{
   types::{BasicType, BasicTypeEnum},
   values::{FunctionValue, PointerValue},
 };
-use itertools::Itertools;
-use tree_sitter::{Node, Tree};
+use tree_sitter::Tree;
 
 use crate::error::{Error, Result};
 
@@ -120,6 +119,14 @@ impl<'node, 'ctx> BaseType {
         }
         ty
       }
+    }
+  }
+  pub fn get_elem_type(&self) -> Self {
+    match self {
+      BaseType::Int => BaseType::Int,
+      BaseType::Float => BaseType::Float,
+      BaseType::Void => BaseType::Void,
+      BaseType::Array(ty, _dimension) => *ty.clone(),
     }
   }
 }
