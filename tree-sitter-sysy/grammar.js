@@ -164,7 +164,7 @@ module.exports = grammar({
 
     return_statement: $ => seq(
       'return',
-      field('return_value', $._expression),
+      optional(field('return_value', $._expression)),
       ';'
     ),
 

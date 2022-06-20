@@ -60,7 +60,8 @@ impl<'ctx> Generator<'ctx> {
 
     let init = declarator.child_by_field_name("init");
     let initializer = if let Some(init) = init {
-      let init = init.child(0).unwrap();
+      let mut cursor = init.walk();
+      let init = init.children(&mut cursor).find(|c| c.kind() != "comment").unwrap();
       match init.kind() {
         "init_list" => self.generate_array_init_list(init, &ty)?,
         "empty_init_list" => {
