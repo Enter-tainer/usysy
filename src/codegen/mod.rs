@@ -69,8 +69,8 @@ impl MBasicType {
 impl Display for MBasicType {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.write_fmt(format_args!(
-      "{} {}",
-      if self.is_const { "const" } else { "" },
+      "{}{}",
+      if self.is_const { "const " } else { "" },
       self.base_type
     ))
   }
@@ -101,7 +101,13 @@ impl Display for BaseType {
       BaseType::Int => f.write_str("i32"),
       BaseType::Float => f.write_str("f32"),
       BaseType::Void => f.write_str("void"),
-      BaseType::Array(b, _) => f.write_fmt(format_args!("{} array", b)),
+      BaseType::Array(b, dimension) => {
+        let mut array_dimension = String::new();
+        for &i in dimension {
+          array_dimension.push_str(&format!("[{i}]"))
+        }
+        f.write_fmt(format_args!("{}{}", b, array_dimension))
+      },
     }
   }
 }
