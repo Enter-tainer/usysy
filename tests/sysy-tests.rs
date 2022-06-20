@@ -60,9 +60,19 @@ fn collect_tests() -> Vec<Test<PathBuf>> {
   // We recursively look for `.rs` files, starting from the current
   // directory.
   let mut tests = Vec::new();
-  let mut current_dir = env::current_dir().expect("invalid working directory");
-  current_dir.extend(["compiler2022", "runtime", "functional"]);
-  visit_dir(&current_dir, &mut tests).expect("unexpected IO error");
+  let current_dir = env::current_dir().expect("invalid working directory");
+  let functional_dir = {
+    let mut tmp = current_dir.clone();
+    tmp.extend(["compiler2022", "runtime", "functional"]);
+    tmp
+  };
+  let _performance_dir = {
+    let mut tmp = current_dir;
+    tmp.extend(["compiler2022", "runtime", "performance"]);
+    tmp
+  };
+  visit_dir(&functional_dir, &mut tests).expect("unexpected IO error");
+  // visit_dir(&performance_dir, &mut tests).expect("unexpected IO error");
 
   tests
 }
