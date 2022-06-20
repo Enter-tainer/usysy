@@ -19,10 +19,12 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
       "-" => (
         ty.clone(),
         match ty {
-          BaseType::Int => self
+          BaseType::Int => {
+            let i32_val = self.builder.build_int_cast(val.into_int_value(), self.context.i32_type(), "neg_to_i32");
+            self
             .builder
-            .build_int_neg(val.into_int_value(), "int_neg")
-            .as_basic_value_enum(),
+            .build_int_neg(i32_val, "int_neg")
+            .as_basic_value_enum()},
           BaseType::Float => self
             .builder
             .build_float_neg(val.into_float_value(), "float_neg")
@@ -40,7 +42,7 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
               val.into_int_value(),
               "logical_not_result_i1",
             );
-            let result_int_i32 = self.builder.build_int_cast(result_int, self.context.i32_type(), "logical_not_result_i32");
+            let result_int_i32 = self.builder.build_int_z_extend(result_int, self.context.i32_type(), "logical_not_result_i32");
             result_int_i32.as_basic_value_enum()
           }
           _ => todo!(),

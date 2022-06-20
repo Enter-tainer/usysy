@@ -1828,6 +1828,10 @@
     [
       "declarator",
       "function_definition"
+    ],
+    [
+      "if_statement",
+      "call_expression"
     ]
   ],
   "precedences": [],
