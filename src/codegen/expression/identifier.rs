@@ -3,7 +3,7 @@ use tree_sitter::Node;
 
 use super::{BaseType, Generator};
 use crate::{error::Result, parser::get_text};
-impl<'ctx, 'node> Generator<'ctx, 'node> {
+impl<'ctx> Generator<'ctx> {
   pub(super) fn generate_identifier_expression(
     &self,
     root: Node,

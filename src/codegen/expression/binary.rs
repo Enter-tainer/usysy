@@ -26,7 +26,7 @@ static FLOAT_COMP_OP_MAP: phf::Map<&'static str, FloatPredicate> = phf_map! {
     "<=" => FloatPredicate::OLE,
 };
 
-impl<'ctx, 'node> Generator<'ctx, 'node> {
+impl<'ctx> Generator<'ctx> {
   pub(super) fn generate_binary_expression(
     &self,
     root: Node,

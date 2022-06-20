@@ -19,11 +19,12 @@ use inkwell::{
   types::{BasicType, BasicTypeEnum},
   values::{FunctionValue, PointerValue},
 };
+use itertools::Itertools;
 use tree_sitter::{Node, Tree};
 
 use crate::error::{Error, Result};
 
-pub struct Generator<'ctx, 'node> {
+pub struct Generator<'ctx> {
   file: File<'ctx>,
   context: &'ctx Context,
   module: Module<'ctx>,
@@ -34,31 +35,31 @@ pub struct Generator<'ctx, 'node> {
   //<<<<<<<<<<<<<<<<<<<<<<<<
 
   // value -> (type, pointer) map in a LLVM basic block
-  val_map_block_stack: Vec<HashMap<String, (MBasicType<'node>, PointerValue<'ctx>)>>,
+  val_map_block_stack: Vec<HashMap<String, (MBasicType, PointerValue<'ctx>)>>,
   // current function block
-  current_function: Option<(FunctionValue<'ctx>, MBasicType<'node>)>,
+  current_function: Option<(FunctionValue<'ctx>, MBasicType)>,
   // break labels (in loop statements)
   break_labels: VecDeque<BasicBlock<'ctx>>,
   // continue labels (in loop statements)
   continue_labels: VecDeque<BasicBlock<'ctx>>,
   // hashset for functions
-  function_map: HashMap<String, (MBasicType<'node>, Vec<(&'ctx str, MBasicType<'node>)>, bool)>,
+  function_map: HashMap<String, (MBasicType, Vec<(&'ctx str, MBasicType)>, bool)>,
   // hashset for global variable
 }
 #[derive(Debug, Clone, PartialEq)]
-pub struct MBasicType<'node> {
+pub struct MBasicType {
   pub is_const: bool,
-  pub base_type: BaseType<'node>,
+  pub base_type: BaseType,
 }
 
-impl<'node> MBasicType<'node> {
-  pub fn new_with_base(base_type: BaseType<'node>, is_const: bool) -> Self {
+impl MBasicType {
+  pub fn new_with_base(base_type: BaseType, is_const: bool) -> Self {
     Self {
       is_const,
       base_type,
     }
   }
-  pub fn new_with_base_mut(base_type: BaseType<'node>) -> Self {
+  pub fn new_with_base_mut(base_type: BaseType) -> Self {
     Self {
       is_const: false,
       base_type,
@@ -66,7 +67,7 @@ impl<'node> MBasicType<'node> {
   }
 }
 
-impl<'node> Display for MBasicType<'node> {
+impl Display for MBasicType {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.write_fmt(format_args!(
       "{} {}",
@@ -83,19 +84,19 @@ pub struct File<'ctx> {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum BaseType<'node> {
+pub enum BaseType {
   Int,
   Float,
   Void,
   Array(
     /// element type
-    Box<BaseType<'node>>,
+    Box<BaseType>,
     /// array length, from high-dimension to low-dimension
-    Vec<Node<'node>>,
+    Vec<i32>,
   ),
 }
 
-impl<'node> Display for BaseType<'node> {
+impl Display for BaseType {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match self {
       BaseType::Int => f.write_str("i32"),
@@ -106,18 +107,24 @@ impl<'node> Display for BaseType<'node> {
   }
 }
 
-impl<'node, 'ctx> BaseType<'node> {
+impl<'node, 'ctx> BaseType {
   pub fn to_llvm_type(&self, ctx: &'ctx Context) -> BasicTypeEnum<'ctx> {
     match self {
       BaseType::Int => ctx.i32_type().as_basic_type_enum(),
       BaseType::Float => ctx.f32_type().as_basic_type_enum(),
       BaseType::Void => ctx.i8_type().as_basic_type_enum(),
-      BaseType::Array(_, _) => todo!(),
+      BaseType::Array(ty, dimension) => {
+        let mut ty = ty.to_llvm_type(ctx);
+        for i in dimension.iter().rev() {
+          ty = ty.array_type(*i as u32).as_basic_type_enum();
+        }
+        ty
+      }
     }
   }
 }
 
-impl<'node> TryFrom<&str> for BaseType<'node> {
+impl TryFrom<&str> for BaseType {
   type Error = Error;
 
   fn try_from(value: &str) -> Result<Self> {
@@ -130,12 +137,8 @@ impl<'node> TryFrom<&str> for BaseType<'node> {
   }
 }
 
-impl<'ctx, 'node> Generator<'ctx, 'node> {
-  pub fn new(
-    context: &'ctx Context,
-    path: &'ctx str,
-    content: &'ctx str,
-  ) -> Generator<'ctx, 'node> {
+impl<'ctx> Generator<'ctx> {
+  pub fn new(context: &'ctx Context, path: &'ctx str, content: &'ctx str) -> Generator<'ctx> {
     let module_name = Path::new(path).file_stem().unwrap().to_str().unwrap();
     let file = File {
       content,

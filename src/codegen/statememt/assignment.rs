@@ -6,7 +6,7 @@ use crate::{
 use tree_sitter::Node;
 
 use super::{Generator};
-impl<'ctx, 'node> Generator<'ctx, 'node> {
+impl<'ctx> Generator<'ctx> {
   pub(super) fn generate_assignment_statement(&self, root: Node) -> Result<()> {
     let lhs = root.child_by_field_name("left").unwrap();
     let rhs = root.child_by_field_name("right").unwrap();

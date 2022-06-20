@@ -8,11 +8,11 @@ use tree_sitter::Node;
 
 use super::{BaseType, Generator, MBasicType};
 
-impl<'ctx, 'node> Generator<'ctx, 'node> {
+impl<'ctx> Generator<'ctx> {
   fn generate_var_impl(
     &mut self,
     is_const: bool,
-    ty: BaseType<'node>,
+    mut ty: BaseType,
     declarator: Node,
     is_global: bool,
   ) -> Result<()> {
@@ -22,9 +22,6 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
       declarator.child_by_field_name("name").unwrap(),
       self.file.content,
     );
-    if declarator.child_by_field_name("dimension").is_some() {
-      todo!("array not supported");
-    }
     if is_global {
       if self.function_map.contains_key(name_str)
         || self.val_map_block_stack[0].contains_key(name_str)
@@ -44,6 +41,19 @@ impl<'ctx, 'node> Generator<'ctx, 'node> {
         src: NamedSource::new(self.file.name, self.file.content.to_string()),
         range: to_source_span(name.range()),
       });
+    }
+    if let Some(dimension) = declarator.child_by_field_name("dimension") {
+      let dimensions = {
+        let mut cursor = dimension.walk();
+        useful_children(&dimension, &mut cursor)
+          .map(|i| {
+            assert_eq!(i.kind(), "int_literal");
+            let text = get_text(i, self.file.content);
+            parse_int::parse::<i32>(text).unwrap()
+          })
+          .collect_vec()
+      };
+      ty = BaseType::Array(Box::new(ty.clone()), dimensions);
     }
     let llvm_type = ty.to_llvm_type(self.context);
 

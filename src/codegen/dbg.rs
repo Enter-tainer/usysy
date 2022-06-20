@@ -2,7 +2,7 @@ use colored::Colorize;
 
 use super::Generator;
 
-impl<'ctx, 'node> Generator<'ctx, 'node> {
+impl<'ctx> Generator<'ctx> {
   pub fn print_function_proto(&self) {
     println!("{}", "function protos: ".bold());
     for (name, (return_type, params, va_arg)) in &self.function_map {

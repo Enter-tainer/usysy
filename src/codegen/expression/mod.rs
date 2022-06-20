@@ -9,7 +9,7 @@ use tree_sitter::Node;
 
 use super::{BaseType, Generator};
 use crate::error::Result;
-impl<'ctx, 'node> Generator<'ctx, 'node> {
+impl<'ctx> Generator<'ctx> {
   pub fn generate_expression(&self, root: Node) -> Result<(BaseType, BasicValueEnum<'ctx>)> {
     match root.kind() {
       "binary_expression" => self.generate_binary_expression(root),

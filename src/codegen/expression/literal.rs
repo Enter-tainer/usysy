@@ -8,7 +8,7 @@ use crate::{
   error::{Error, Result},
   parser::{get_text, to_source_span},
 };
-impl<'ctx, 'node> Generator<'ctx, 'node> {
+impl<'ctx> Generator<'ctx> {
   pub(super) fn generate_float_literal_expression(
     &self,
     root: Node,

@@ -13,7 +13,7 @@ use miette::NamedSource;
 use tree_sitter::Node;
 
 use super::Generator;
-impl<'ctx, 'node> Generator<'ctx, 'node> {
+impl<'ctx> Generator<'ctx> {
   pub(super) fn generate_statement(&mut self, root: Node) -> Result<()> {
     let stat_type = root.kind();
     match stat_type {

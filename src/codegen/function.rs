@@ -15,7 +15,7 @@ use tree_sitter::Node;
 
 use super::{BaseType, Generator, MBasicType};
 
-impl<'ctx, 'node> Generator<'ctx, 'node> {
+impl<'ctx> Generator<'ctx> {
   pub(super) fn generate_function_proto(&mut self, function: Node) -> Result<()> {
     let ret_type = BaseType::try_from(get_text(
       function.child_by_field_name("return_type").unwrap(),

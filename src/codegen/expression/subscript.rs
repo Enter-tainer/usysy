@@ -3,7 +3,7 @@ use tree_sitter::Node;
 
 use super::{BaseType, Generator};
 use crate::error::Result;
-impl<'ctx, 'node> Generator<'ctx, 'node> {
+impl<'ctx> Generator<'ctx> {
   pub(super) fn generate_subscript_expression(
     &self,
     _root: Node,

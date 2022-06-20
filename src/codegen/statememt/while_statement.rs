@@ -2,7 +2,7 @@ use crate::error::Result;
 use tree_sitter::Node;
 
 use super::Generator;
-impl<'ctx, 'node> Generator<'ctx, 'node> {
+impl<'ctx> Generator<'ctx> {
   pub(super) fn generate_while_statement(&mut self, root: Node) -> Result<()> {
     let current_fn = self.current_function.as_ref().unwrap().0;
 
