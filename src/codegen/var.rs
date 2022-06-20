@@ -122,8 +122,8 @@ impl<'ctx> Generator<'ctx> {
 
   fn generate_array_init_list(
     &self,
-    init_list: Node,
-    array_ty: &BaseType,
+    _init_list: Node,
+    _array_ty: &BaseType,
   ) -> Result<BasicValueEnum> {
     todo!()
   }

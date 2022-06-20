@@ -1,0 +1,7 @@
+int main() {
+  int a = 0, sum = 0;
+  while (a < n) {
+    sum = sum + a;
+    a = a + 1;
+  }
+}
