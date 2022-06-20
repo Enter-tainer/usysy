@@ -2,7 +2,7 @@ use crate::{
   error::{Error, Result},
   parser::{get_text, to_source_span, useful_children},
 };
-use inkwell::values::BasicValueEnum;
+use inkwell::{types::BasicType, values::BasicValueEnum};
 use itertools::Itertools;
 use miette::NamedSource;
 use tree_sitter::Node;
@@ -61,11 +61,22 @@ impl<'ctx> Generator<'ctx> {
     let init = declarator.child_by_field_name("init");
     let initializer = if let Some(init) = init {
       let mut cursor = init.walk();
-      let init = init.children(&mut cursor).find(|c| c.kind() != "comment").unwrap();
+      let init = init
+        .children(&mut cursor)
+        .find(|c| c.kind() != "comment")
+        .unwrap();
       match init.kind() {
         "init_list" => self.generate_array_init_list(init, &ty)?,
         "empty_init_list" => {
-          todo!()
+          if let BaseType::Array(ty, dim) = &ty {
+            let mut llvm_ty = ty.to_llvm_type(self.context);
+            for i in dim.iter().rev() {
+              llvm_ty = llvm_ty.array_type(*i as u32).as_basic_type_enum();
+            }
+            llvm_ty.const_zero()
+          } else {
+            unreachable!()
+          }
         }
         _ => {
           let (expr_ty, val) = self.generate_expression(init)?;
