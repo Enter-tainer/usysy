@@ -12,19 +12,19 @@ path = "src/main.rs"
 name = "sysy"
 path = "src/lib.rs"
 crate-type = ["rlib", "cdylib"]
-[dependencies]
-clap = { version = "3.2", features = ["derive"] }
-inkwell = { version = "0.1.0-beta.4", features = ["llvm13-0"]}
-thiserror = "1.0"
-miette = { version = "5.1", features = ["fancy"] }
-tree-sitter = "0.20.6"
-tree-sitter-sysy = {path = "./tree-sitter-sysy"}
-colored = "2"
-itertools = "*"
-phf = { version = "0.10", features = ["macros"] }
-lexical = "6.1.1"
-parse_int = { version = "0.6.0", features = ["implicit-octal"] }
-libtest-mimic = "0.4"
+[dependencies] # 第三方库
+clap = { version = "3.2", features = ["derive"] } # 命令行解析器
+inkwell = { version = "0.1.0-beta.4", features = ["llvm13-0"]} # LLVM binding
+thiserror = "1.0" # 错误处理
+miette = { version = "5.1", features = ["fancy"] } # 错误处理
+tree-sitter = "0.20.6" # parser 生成器
+tree-sitter-sysy = {path = "./tree-sitter-sysy"} # 我自己使用 tree-sitter 编写的 sysy 语言的 parser
+colored = "2" # 用于在终端中打印彩色字符
+itertools = "*" # 提供了迭代器工具函数
+phf = { version = "0.10", features = ["macros"] } # 用于在编译期构造哈希表
+lexical = "6.1.1" # 用于解析浮点数字面量
+parse_int = { version = "0.6.0", features = ["implicit-octal"] } # 用于解析整数字面量
+libtest-mimic = "0.4" # 用于测试框架
 [[test]]
 name = "sysy-tests"
 harness = false
