@@ -29,7 +29,7 @@ info: The currently active `rustc` version is `rustc 1.61.0 (fe5b13d68 2022-05-1
 - cargo：rust 语言的包管理器和构建工具：根据项目中的 `Cargo.toml` 文件，自动下载并编译相关第三方库，并编译代码
   - 在 C 语言工具链中的对应物：make + cmake
 
-关于 Rust 语言的内容，请参考 https://course.rs/about-book.html
+关于 Rust 语言的更多内容，请参考 https://course.rs/about-book.html
 ### 编译本项目
 
 在项目根目录下，执行 `cargo run -- -h`，cargo 会自动拉取并编译第三方库和本项目的代码，并运行本项目。
@@ -78,7 +78,7 @@ For more information try --help
 ```
 
 同时，我们也可以使用 `cargo run -- `来运行本项目，这与直接使用 `./target/debug` 具有相同的效果。
-区别是如果代码更新了， `cargo run`会自动重新编译代码。
+区别是如果代码发生改变时， `cargo run`会自动重新编译代码。
 
 为了使用本项目编译 sysy 程序，我们需要使用以下命令行参数：
 
