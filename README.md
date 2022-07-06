@@ -137,12 +137,41 @@ entry:
 并同时编译 sysy 运行时库。执行的命令行形如 `clang xxx.bc ./compiler2022/runtime/sylib.c -o xxx.exe`
 
 如果系统中没有名为 `clang` 的可执行文件，或找不到 `./compiler2022/runtime/sylib.c`，那么就会遇到错误。
+
+## 功能
+
+可以查看本程序的帮助：
+```
+❯ cargo run -- -h
+    Finished dev [unoptimized + debuginfo] target(s) in 0.31s
+     Running `target/debug/sysy -h`
+sysy 0.1.0
+
+USAGE:
+    sysy [OPTIONS] <INPUT>
+
+ARGS:
+    <INPUT>    input file path
+
+OPTIONS:
+    -a, --ast           print ast -> 打印语法树
+    -e, --exe-enable    enable exe output -> 输出可执行的二进制文件
+    -g, --global        print global vars -> 打印全局变量
+    -h, --help          Print help information -> 打印帮助信息
+    -i, --ir-enable     enable ir output -> 输出 IR 到当前目录下的 ll 文件
+    -p, --prototype     print function prototypes -> 打印函数原型
+    -V, --version       Print version information -> 打印版本信息
+
+```
+
+不同选项可以灵活组合，例如 `-iapge` 代表输出 IR 和可执行文件，同时打印语法树，全局变量，和函数原型
+
 ## 文件结构
 ```
 ❯ ls --tree
 .
 ├── Cargo.lock
-├── Cargo.toml
+├── Cargo.toml -> 项目配置文件，记录了第三方库等信息
 ├── compiler2022/ -> 编译大赛相关文件
 ├── README.md
 ├── rustfmt.toml
