@@ -29,9 +29,12 @@ info: The currently active `rustc` version is `rustc 1.61.0 (fe5b13d68 2022-05-1
 - cargo：rust 语言的包管理器和构建工具：根据项目中的 `Cargo.toml` 文件，自动下载并编译相关第三方库，并编译代码
   - 在 C 语言工具链中的对应物：make + cmake
 
+关于 Rust 语言的内容，请参考 https://course.rs/about-book.html
 ### 编译本项目
 
-在项目根目录下，执行 `cargo run -- -h`，cargo 会自动编译第三方库和本项目的代码，并运行本项目。
+在项目根目录下，执行 `cargo run -- -h`，cargo 会自动拉取并编译第三方库和本项目的代码，并运行本项目。
+
+注意，由于第三方库代码托管在 GitHub 上，因此可能会遇到网络连接性的问题。可以通过配置环境变量 `http_proxy`, `https_proxy`，或使用 https://rsproxy.cn 等国内镜像服务。
 
 - `cargo run` 用于运行项目
   - `--` 之后的部分，将作为命令行参数传递给本项目
@@ -80,15 +83,16 @@ For more information try --help
 为了使用本项目编译 sysy 程序，我们需要使用以下命令行参数：
 
 ```
-./target/debug/sysy ./tests/cases/hello_world.sy -e
+./target/debug/sysy ./tests/cases/hello_world.sy -i -e
 ```
 
-其中， `-e` 代表生成可执行程序。编译完成后，在当前目录下，会出现可执行文件：
+其中， `-i` 代表生成 LLVM IR， `-e` 代表生成可执行程序。编译完成后，在当前目录下，会出现可执行文件：
 
 ```
 ❯ ll hello_world.*
-.rw-r--r-- 1.5k mgt  2 7月  22:04 hello_world.bc
-.rwxr-xr-x  22k mgt  2 7月  22:04 hello_world.exe
+.rw-r--r-- 1.5k mgt  2 7月  22:16 hello_world.bc
+.rwxr-xr-x  22k mgt  2 7月  22:16 hello_world.exe
+.rw-r--r--  672 mgt  2 7月  22:16 hello_world.ll
 
 ```
 
@@ -100,6 +104,39 @@ TOTAL: 0H-0M-0S-0us
 hello world⏎ 
 
 ```
+
+可以查看 LLVM IR（为了篇幅简洁，删除不必要部分）：
+
+```
+❯ cat hello_world.ll
+; ModuleID = 'hello_world.bc'
+source_filename = "hello_world"
+declare i8 @putch(i32)
+define i32 @main() {
+entry:
+  %fn_call = call i8 @putch(i32 104)
+  %fn_call1 = call i8 @putch(i32 101)
+  %fn_call2 = call i8 @putch(i32 108)
+  %fn_call3 = call i8 @putch(i32 108)
+  %fn_call4 = call i8 @putch(i32 111)
+  %fn_call5 = call i8 @putch(i32 32)
+  %fn_call6 = call i8 @putch(i32 119)
+  %fn_call7 = call i8 @putch(i32 111)
+  %fn_call8 = call i8 @putch(i32 114)
+  %fn_call9 = call i8 @putch(i32 108)
+  %fn_call10 = call i8 @putch(i32 100)
+  ret i32 0
+}
+```
+
+### 错误排查
+
+在生成可执行文件时，需要调用 clang，并与 sysy 运行时库进行链接。
+
+这部分的逻辑位于 `src/util.rs` 中，本项目会调用 `clang`，对 LLVM bitcode 进行编译，
+并同时编译 sysy 运行时库。执行的命令行形如 `clang xxx.bc ./compiler2022/runtime/sylib.c -o xxx.exe`
+
+如果系统中没有名为 `clang` 的可执行文件，或找不到 `./compiler2022/runtime/sylib.c`，那么就会遇到错误。
 ## 文件结构
 ```
 ❯ ls --tree
